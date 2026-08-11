@@ -1,0 +1,19 @@
+# Zależności i wyniki budowania
+node_modules/
+.next/
+out/
+build/
+*.tsbuildinfo
+
+# Środowisko
+.env
+.env.*
+!.env.example
+
+# Lokalne ustawienia narzędzi — launch.json zostaje, bo opisuje jak odpalić projekt
+.claude/settings.local.json
+
+# System
+.DS_Store
+Thumbs.db
+desktop.ini

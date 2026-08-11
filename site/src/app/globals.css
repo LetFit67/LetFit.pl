@@ -1,0 +1,542 @@
+@import "tailwindcss";
+
+/*
+  Paleta wyprowadzona wprost z logo „LetFit Physio" (Logo faworyt 2).
+  Dominanty odczytane z pliku: granat #011548, błękit kręgosłupa #02347A / #043983,
+  grafit konturów #36363A, tło czysta biel.
+
+  Zasada: granat niesie tekst i ciemne sekcje, błękit jest jedynym akcentem,
+  a jasne tła są chłodne — tak, żeby strona czytała się jak materiał medyczny,
+  a nie jak serwis sportowy.
+*/
+@theme {
+  /* Granat — tekst i ciemne sekcje */
+  --color-ink: #0a1433;
+  --color-ink-80: #26325a;
+  --color-ink-60: #4c587a;
+  --color-ink-40: #7f89a4;
+
+  /* Jasne podłoża */
+  --color-paper: #fbfcfe;
+  --color-mist: #f1f5fb;
+  --color-mist-dim: #e7eef8;
+  --color-mist-dark: #d5e0ef;
+
+  /* Błękit — akcent */
+  --color-blue: #10428f;
+  --color-blue-deep: #0a2c63;
+  --color-blue-bright: #7fb0f2;
+  --color-blue-soft: #e3ebf7;
+
+  /* Czerwień sygnalizacyjna — wyłącznie do oznaczenia miejsca bólu w grafice hero. */
+  --color-alert: #c2402f;
+
+  --font-display: var(--font-serif), Georgia, "Times New Roman", serif;
+  --font-sans: var(--font-inter), system-ui, sans-serif;
+
+  /* Ostrzejsze narożniki czytają się bardziej formalnie niż zaokrąglone kafle. */
+  --radius-card: 0.375rem;
+  --radius-btn: 0.25rem;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    /* sticky nagłówek nie może zasłaniać kotwic */
+    scroll-padding-top: 5.5rem;
+  }
+
+  body {
+    background-color: var(--color-paper);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    text-wrap: pretty;
+  }
+
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-display);
+    font-weight: 600;
+    letter-spacing: -0.011em;
+    text-wrap: balance;
+  }
+
+  ::selection {
+    background-color: var(--color-blue-soft);
+    color: var(--color-ink);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-blue);
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+}
+
+@utility container-x {
+  width: 100%;
+  max-width: 76rem;
+  margin-inline: auto;
+  padding-inline: 1.25rem;
+
+  @media (width >= 48rem) {
+    padding-inline: 2rem;
+  }
+}
+
+/*
+  ANIMACJA HERO — celowo powściągliwa.
+
+  Elementy wchodzą raz, przy załadowaniu strony: łagodne wypłynięcie w górę
+  z drobnym opóźnieniem między kolejnymi wierszami. Żadnych pętli, odbić ani
+  ruchu sterowanego scrollem — na stronie gabinetu to byłoby nie na miejscu.
+  Poza hero strona jest statyczna.
+*/
+/*
+  Wejście oparte na @starting-style i WYŁĄCZNIE na transformacji — bez wygaszania.
+
+  Powód jest praktyczny: gdy strona otworzy się w karcie w tle albo renderuje ją
+  bot do zrzutów, oś czasu dokumentu stoi i przejście zostaje zamrożone w stanie
+  początkowym. Przy animacji krycia oznaczałoby to pusty hero. Tutaj najgorszy
+  możliwy skutek to treść przesunięta o kilkanaście pikseli — w pełni czytelna.
+
+  Stanem domyślnym jest pozycja docelowa, więc silnik nieznający @starting-style
+  po prostu pokazuje gotową sekcję bez animacji.
+*/
+@utility hero-in {
+  transform: none;
+  transition: transform 0.8s cubic-bezier(0.22, 0.61, 0.36, 1);
+  transition-delay: var(--delay, 0ms);
+
+  @starting-style {
+    transform: translateY(0.9rem);
+  }
+}
+
+/* Kadr ze zdjęciem dochodzi skalą — ruch ledwie wyczuwalny. */
+@utility hero-frame-in {
+  transform: none;
+  transition: transform 1.2s cubic-bezier(0.22, 0.61, 0.36, 1);
+  transition-delay: var(--delay, 0ms);
+
+  @starting-style {
+    transform: scale(0.97);
+  }
+}
+
+/*
+  KAFLE „DLA KOGO" (components/for-whom.tsx).
+
+  Każdy kafel dostaje z komponentu własny akcent w `--accent`, a spod kursora
+  dwie liczby: kąt przechyłu (`--rx`, `--ry`) i środek poświaty (`--gx`, `--gy`).
+  Wszystkie stany domyślne to stan spoczynkowy kafla — poświata pod kursorem
+  jest jedynym elementem startującym od zera i włącza ją dopiero `:hover`,
+  więc zamrożona oś czasu dokumentu nie potrafi ukryć tu żadnej treści.
+
+  `color-mix` zamiast gotowych półprzezroczystych kolorów: akcent wchodzi
+  z komponentu jako jeden hex, a warstwy wyliczają sobie z niego krycie same.
+*/
+@utility tilt-card {
+  transform: perspective(900px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg))
+    scale(var(--card-scale, 1));
+  transition:
+    transform 260ms cubic-bezier(0.22, 0.61, 0.36, 1),
+    opacity 260ms ease,
+    border-color 260ms ease;
+}
+
+@utility card-tint {
+  background: radial-gradient(
+    ellipse at 18% 14%,
+    color-mix(in srgb, var(--accent) 9%, transparent),
+    transparent 62%
+  );
+}
+
+@utility card-glow {
+  background: radial-gradient(
+    260px circle at var(--gx, 50%) var(--gy, 0%),
+    color-mix(in srgb, var(--accent) 14%, transparent),
+    transparent 72%
+  );
+}
+
+@utility icon-badge {
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 20%, transparent);
+}
+
+@utility accent-rule {
+  background: linear-gradient(
+    to right,
+    color-mix(in srgb, var(--accent) 70%, transparent),
+    transparent
+  );
+}
+
+/*
+  ETAPY WIZYTY — wejście po kolei (components/stagger.tsx).
+
+  Stan ukryty obowiązuje wyłącznie wtedy, gdy skrypt zdążył ustawić
+  data-stagger="pending". Bez JS-a żadna z tych reguł nie zadziała i treść
+  jest po prostu widoczna — dlatego selektory celują w atrybut, a nie w klasę.
+*/
+[data-stagger="pending"] .stagger-item {
+  opacity: 0;
+  transform: translateY(0.75rem);
+}
+
+[data-stagger="in"] .stagger-item {
+  opacity: 1;
+  transform: none;
+  transition:
+    opacity 0.6s cubic-bezier(0.22, 0.61, 0.36, 1),
+    transform 0.6s cubic-bezier(0.22, 0.61, 0.36, 1);
+  transition-delay: calc(var(--i, 0) * 130ms);
+}
+
+/*
+  OZDOBNIKI HERO — bardzo powolne dryfujące plamy mgły w tle sekcji.
+  Amplituda i tempo są celowo minimalne: mają budować głębię, a nie zwracać
+  na siebie uwagę. Stan spoczynkowy jest widoczny, więc zamrożenie nic nie psuje.
+*/
+@utility mist-drift {
+  animation: mist-drift 34s ease-in-out infinite alternate;
+  animation-delay: var(--delay, 0ms);
+}
+
+@keyframes mist-drift {
+  from {
+    transform: translate3d(0, 0, 0) scale(1);
+    opacity: 0.5;
+  }
+  to {
+    transform: translate3d(2.5rem, -1.5rem, 0) scale(1.12);
+    opacity: 0.85;
+  }
+}
+
+/*
+  PROPOZYCJE GRAFIKI HERO (components/hero-animations.tsx).
+
+  Wspólna zasada dla wszystkich trzech: klatka 0% jest zarazem stanem
+  spoczynkowym, a klatka 100% wraca do tego samego miejsca. Dzięki temu
+  grafika zamrożona w czasie zerowym (karta w tle, bot do zrzutów) oraz
+  zredukowana przez `prefers-reduced-motion` wygląda jak skończona ilustracja.
+*/
+
+/* --- A: kręgosłup diagnostyczny ------------------------------------ */
+
+@utility vert-scan {
+  fill-opacity: 0.5;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: vert-scan 6s ease-in-out infinite;
+  animation-delay: calc(var(--i, 0) * 0.16s);
+}
+
+@keyframes vert-scan {
+  0%,
+  26%,
+  100% {
+    fill-opacity: 0.5;
+    transform: scale(1);
+  }
+  8% {
+    fill-opacity: 1;
+    transform: scale(1.16);
+  }
+}
+
+@utility vert-alert {
+  fill-opacity: 0.9;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: vert-alert 1.9s ease-in-out infinite;
+}
+
+@keyframes vert-alert {
+  0%,
+  100% {
+    fill-opacity: 0.9;
+    transform: scale(1);
+  }
+  50% {
+    fill-opacity: 1;
+    transform: scale(1.2);
+  }
+}
+
+@utility alert-halo {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: alert-halo 1.9s ease-out infinite;
+}
+
+@keyframes alert-halo {
+  0% {
+    transform: scale(0.65);
+    opacity: 0.45;
+  }
+  100% {
+    transform: scale(1.9);
+    opacity: 0;
+  }
+}
+
+/* --- B: zakres ruchu ------------------------------------------------ */
+
+@utility rom-arm {
+  transform-box: view-box;
+  transform-origin: 110px 347px;
+  animation: rom-arm 7s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+}
+
+@keyframes rom-arm {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  50% {
+    transform: rotate(-62deg);
+  }
+}
+
+/* Łuk kąta wypełnia się dokładnie w rytm ramienia. Długość ścieżki ≈ 168. */
+@utility rom-arc {
+  stroke-dasharray: 168;
+  stroke-dashoffset: 168;
+  animation: rom-arc 7s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+}
+
+@keyframes rom-arc {
+  0%,
+  100% {
+    stroke-dashoffset: 168;
+  }
+  50% {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* --- C: pion postawy ------------------------------------------------ */
+
+/*
+  Znaczniki punktów kostnych zjeżdżają się do pionu odniesienia i po chwili
+  wracają do odchylenia. Stan spoczynkowy (0%) to sylwetka odchylona —
+  czyli sytuacja przed korektą, więc zamrożona klatka nadal ma sens.
+*/
+@utility posture-mark {
+  transform-box: fill-box;
+  animation: posture-align 7s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+  animation-delay: calc(var(--i, 0) * 0.18s);
+}
+
+@keyframes posture-align {
+  0%,
+  100% {
+    transform: translateX(var(--dx, 0));
+  }
+  42%,
+  62% {
+    transform: translateX(0);
+  }
+}
+
+/*
+  GRAFIKA HERO — kręgosłup w okręgu (components/hero-figure.tsx).
+
+  Obie animacje wracają do stanu wyjściowego: fala kręgów zaczyna i kończy
+  w położeniu neutralnym, a łuk pokonuje pełny obwód. Zamrożone w czasie zerowym
+  dają skończoną ilustrację, a nie kadr z połowy ruchu.
+*/
+@utility vertebra {
+  fill-opacity: 0.55;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: vertebra-wave 5.5s ease-in-out infinite;
+  animation-delay: calc(var(--i, 0) * 0.18s);
+}
+
+@keyframes vertebra-wave {
+  0%,
+  32%,
+  100% {
+    fill-opacity: 0.55;
+    transform: scale(1);
+  }
+  12% {
+    fill-opacity: 1;
+    transform: scale(1.16);
+  }
+}
+
+/* Łuk „zakresu ruchu” obiegający okrąg. Obwód dla r=158 to ok. 992,7. */
+@utility rom-sweep {
+  stroke-dasharray: 150 843;
+  animation: rom-sweep 14s linear infinite;
+}
+
+@keyframes rom-sweep {
+  from {
+    stroke-dashoffset: 0;
+  }
+  to {
+    stroke-dashoffset: -993;
+  }
+}
+
+/*
+  Powolny puls przy sygnecie kręgosłupa w tle hero — jedyny element, który
+  nie zatrzymuje się po wejściu. Amplituda jest na tyle mała, że działa jak
+  oddech, a nie jak animacja zwracająca uwagę.
+*/
+@utility hero-breathe {
+  animation: hero-breathe 9s ease-in-out infinite;
+}
+
+/* Znak wodny leży teraz na jasnej zasłonie klipu z biegaczem, a nie na czystym
+   tle sekcji, więc dawne 0.05–0.09 gubiło go całkowicie. Wartości dobrane tak,
+   żeby znak był czytelny, ale nie wchodził w drogę sylwetce biegacza. */
+@keyframes hero-breathe {
+  0%,
+  100% {
+    opacity: 0.12;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.18;
+    transform: scale(1.03);
+  }
+}
+
+/*
+  Podmiana drugiego wiersza nagłówka hero (components/hero-rotating-line.tsx).
+
+  Stanem docelowym jest pełna widoczność i zerowe przesunięcie, więc gdy
+  animacja nie zadziała — bo użytkownik prosi o mniej ruchu albo karta stoi
+  w tle — wiersz i tak jest czytelny. Wyjścia poprzedniego wariantu nie
+  animujemy: dwa mijające się teksty robiły kaszę. Ruch jest celowo łagodny —
+  długie wyjście z krzywej, przesunięcie na jedną szóstą wysokości litery
+  i wolny połysk, żeby wiersz się przelewał, a nie przeskakiwał.
+
+  Wjazd i połysk siedzą w JEDNEJ klasie celowo. Rozbite na dwie ustawiałyby
+  obie skrót `animation` i ta późniejsza w arkuszu kasowałaby wcześniejszą,
+  więc działałby tylko jeden z dwóch efektów.
+
+  Połysk wycina gradient maską tekstu, dlatego kolor liter bierze się
+  z `background-image`, a `color` jest przezroczysty. Skrajne przystanki to
+  kolor pisma strony, środkowy to błękit marki: wiersz rozjaśnia się na moment,
+  zamiast migać obcym kolorem. Przy każdym położeniu gradientu litery mają
+  jakiś kryjący kolor, więc zatrzymana animacja nie zostawia pustego miejsca.
+*/
+@utility hero-swap {
+  background-image: linear-gradient(
+    100deg,
+    var(--color-ink) 35%,
+    var(--color-blue) 50%,
+    var(--color-ink) 65%
+  );
+  background-size: 320% 100%;
+  background-position: 190% center;
+  background-clip: text;
+  color: transparent;
+  /*
+    Nagłówek ma interlinię 1.08, czyli ciaśniejszą niż naturalna wysokość
+    kroju, więc ogonki „ą", „ę" i „j" wystają poza pole tła. Przy maskowaniu
+    tekstem malowane jest TYLKO to pole — wystające fragmenty zostawały
+    niepomalowane i wyglądały na ucięte. Wyściółka powiększa pole tła,
+    a ujemny margines oddaje tę samą wartość układowi, więc komórka siatki
+    ma dalej wysokość jednego wiersza i nic się nie przesuwa.
+  */
+  padding-block: 0.2em;
+  margin-block: -0.2em;
+  animation:
+    hero-swap 760ms cubic-bezier(0.22, 0.61, 0.36, 1) both,
+    hero-shimmer 5s linear infinite;
+}
+
+@keyframes hero-swap {
+  from {
+    opacity: 0;
+    transform: translateY(0.16em);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes hero-shimmer {
+  to {
+    background-position: -90% center;
+  }
+}
+
+/*
+  Płynne rozwijanie opisów w cenniku i w „Zanim przyjdziesz".
+
+  `<details>` z natury otwiera się skokiem, bo przeglądarka po prostu odsłania
+  treść. Animujemy więc `::details-content` — pseudoelement obejmujący wszystko
+  poza `<summary>`. Wysokość jedzie od zera do `auto`, co normalnie jest
+  nieanimowalne; odblokowuje to `interpolate-size: allow-keywords` na korzeniu
+  dokumentu. `content-visibility` z `allow-discrete` sprawia, że treść znika
+  dopiero PO zwinięciu, a nie w pierwszej klatce — bez tego zamykanie dalej
+  byłoby skokiem.
+
+  Starsze przeglądarki, które nie znają `::details-content`, po prostu otworzą
+  panel od razu, tak jak wcześniej. Nic się nie psuje, brakuje tylko animacji.
+  Przy `prefers-reduced-motion` globalna reguła niżej i tak skraca czas do zera.
+*/
+:root {
+  interpolate-size: allow-keywords;
+}
+
+.smooth-details details::details-content {
+  block-size: 0;
+  overflow: clip;
+  transition:
+    block-size 320ms cubic-bezier(0.22, 0.61, 0.36, 1),
+    content-visibility 320ms allow-discrete;
+}
+
+.smooth-details details[open]::details-content {
+  block-size: auto;
+}
+
+/*
+  Podpowiedź „najedź / dotknij" przy rozwijanych listach (components/hover-reveal.tsx).
+
+  Rozstrzyga o tym CSS, a nie JavaScript, bo urządzenie wykryte po hydratacji
+  powodowałoby podmianę tekstu w locie. Stanem domyślnym jest wariant dotykowy —
+  jeśli zapytanie o wskaźnik nie zadziała, pacjent dostanie instrukcję, która
+  działa na wszystkim.
+*/
+.hint-pointer {
+  display: none;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .hint-pointer {
+    display: inline;
+  }
+  .hint-touch {
+    display: none;
+  }
+}
+
+/* Kto prosi o mniej ruchu, dostaje statyczną stronę. */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
