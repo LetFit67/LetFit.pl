@@ -305,3 +305,24 @@ npx vercel
 
 Przed publikacją: podmień `seo.siteUrl` na docelową domenę i sprawdź, czy na
 stronie nie został żaden znacznik `[UZUPEŁNIJ]`.
+
+**Uwaga przy imporcie repozytorium do Vercela: `Root Directory` musi wskazywać
+na `site`.** Aplikacja siedzi w podkatalogu, w korzeniu repo leżą materiały marki.
+
+### Podgląd przed startem (`LETFIT_PREVIEW`)
+
+Strona wystawiona pod adresem tymczasowym (np. `letfit.vercel.app`) może trafić
+do Google i konkurować z docelową domeną. Żeby do tego nie dopuścić, ustaw
+w panelu hostingu zmienną:
+
+```
+LETFIT_PREVIEW=1
+```
+
+Wtedy `robots.txt` blokuje całą stronę, a każda podstrona dostaje w `<head>`
+znacznik `noindex, nofollow`. Bez tej zmiennej strona zachowuje się normalnie —
+jest indeksowana.
+
+Wartość jest odczytywana **przy budowaniu** (strona jest statyczna), więc
+zmiana w panelu działa dopiero po nowym deployu. Przed uruchomieniem letfit.pl
+zmienną trzeba skasować i przebudować. Kod: `src/lib/preview.ts`.

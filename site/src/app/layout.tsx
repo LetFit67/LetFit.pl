@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Inter, Source_Serif_4 } from "next/font/google";
 import { seo } from "@/content/site";
+import { isPreview } from "@/lib/preview";
 import "./globals.css";
 
 /**
@@ -32,7 +33,7 @@ export const metadata: Metadata = {
     type: "website",
     locale: "pl_PL",
     url: "/",
-    siteName: "LETFIT — Mikołaj Letkiewicz",
+    siteName: "LETFIT, Mikołaj Letkiewicz",
     title: seo.title,
     description: seo.description,
   },
@@ -41,7 +42,9 @@ export const metadata: Metadata = {
     title: seo.title,
     description: seo.description,
   },
-  robots: { index: true, follow: true },
+  /* Meta `robots` dubluje zakaz z `robots.txt` — ten plik można przeoczyć
+     albo zignorować, a znacznik w <head> jedzie razem z każdą podstroną. */
+  robots: isPreview ? { index: false, follow: false } : { index: true, follow: true },
 };
 
 export const viewport: Viewport = {
