@@ -3,7 +3,7 @@
  *
  *   node scripts/build-brand-pictogram.mjs
  *
- * Źródła leżą w „Logo concept/Piktogram 2026". Są to rastry na białym tle,
+ * Źródła leżą w „brand/pictogram-2026". Są to rastry na białym tle,
  * więc skrypt wycina biel do przezroczystości, przycina do zawartości
  * i składa docelowe pliki.
  *
