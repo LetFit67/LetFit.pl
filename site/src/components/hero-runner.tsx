@@ -31,11 +31,17 @@ const DESKTOP_MASK: CSSProperties = {
   WebkitMaskComposite: "source-in",
 };
 
+/**
+ * Na telefonie klip leży POD TEKSTEM, więc maska ma inne zadanie niż na
+ * desktopie: nie odsuwa obrazu od kolumny z tekstem, tylko wytapia go przy
+ * górnej i dolnej krawędzi sekcji, żeby nie było widać, gdzie się zaczyna
+ * i kończy. Góra schodzi ostrzej — tam siedzi nagłówek.
+ */
 const MOBILE_MASK: CSSProperties = {
   maskImage:
-    "linear-gradient(to bottom, transparent 0%, #000 24%, #000 70%, transparent 100%)",
+    "linear-gradient(to bottom, transparent 0%, #000 26%, #000 82%, transparent 100%)",
   WebkitMaskImage:
-    "linear-gradient(to bottom, transparent 0%, #000 24%, #000 70%, transparent 100%)",
+    "linear-gradient(to bottom, transparent 0%, #000 26%, #000 82%, transparent 100%)",
 };
 
 function useReducedMotionPause() {
@@ -87,24 +93,36 @@ export function HeroRunnerLayer() {
   );
 }
 
-/** Pas pod tekstem — na ekranach mniejszych niż lg. */
-export function HeroRunnerBand() {
+/**
+ * Tło całej sekcji — na ekranach mniejszych niż lg.
+ *
+ * Wcześniej klip był tu osobnym pasem POD tekstem. Materiał jest pionowy
+ * (760×1014), więc w pasie wysokim na 18 rem `object-cover` obcinał go do
+ * wąskiego wycinka w połowie kadru — biegacz gubił głowę i nogi, a sekcja
+ * kończyła się prostokątem wideo doklejonym do treści.
+ *
+ * Teraz klip wypełnia hero pod tekstem: pionowy kadr trafia w pionowy ekran
+ * telefonu prawie bez przycięcia. Czytelność pisma robią trzy warstwy —
+ * rozmycie, zasłona w kolorze tła (gęstsza u góry, pod nagłówkiem) i chłodny
+ * odcień marki.
+ */
+export function HeroRunnerBackdrop() {
   const ref = useReducedMotionPause();
 
   return (
     <div
       aria-hidden="true"
-      /* Renderowany poza `container-x`, więc pełna szerokość sekcji wychodzi
-         wprost z `w-full` — bez ujemnych marginesów i bez prześwitu przy krawędzi. */
-      className="pointer-events-none relative mt-10 h-72 w-full select-none lg:hidden"
+      className="pointer-events-none absolute inset-0 select-none lg:hidden"
       style={MOBILE_MASK}
     >
       <video
         ref={ref}
         {...VIDEO_PROPS}
-        className="size-full scale-105 object-cover blur-[2px]"
+        className="size-full scale-105 object-cover blur-[3px]"
       />
-      <div className="absolute inset-0 bg-paper/45" />
+      {/* Zasłona schodzi z krycia u góry ku dołowi: nagłówek dostaje spokojne
+          tło, a niżej — przy wyliczance i przyciskach — widać więcej ruchu. */}
+      <div className="absolute inset-0 bg-linear-to-b from-paper/85 via-paper/62 to-paper/72" />
       <div className="absolute inset-0 bg-blue/10 mix-blend-multiply" />
     </div>
   );

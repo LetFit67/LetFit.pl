@@ -2,7 +2,7 @@ import type { CSSProperties } from "react";
 import Image from "next/image";
 import { booking, business, collaborations, hero, telLink, waLink } from "@/content/site";
 import { HeroRotatingLine } from "./hero-rotating-line";
-import { HeroRunnerBand, HeroRunnerLayer } from "./hero-runner";
+import { HeroRunnerBackdrop, HeroRunnerLayer } from "./hero-runner";
 import {
   ButtonLink,
   CalendarIcon,
@@ -31,6 +31,8 @@ export function Hero() {
       />
       {/* Biegacz jako warstwa tła przy prawej krawędzi — bez ramki i wcięcia. */}
       <HeroRunnerLayer />
+      {/* Ten sam klip na telefonie: tło całej sekcji, pod tekstem. */}
+      <HeroRunnerBackdrop />
 
       {/* Znak wodny leży NA klipie z biegaczem, nie pod nim. Wcześniej szedł
           przed `HeroRunnerLayer`, więc przykrywała go rozjaśniająca zasłona
@@ -160,10 +162,6 @@ export function Hero() {
         {/* Pusta kolumna rezerwuje miejsce dla warstwy z biegaczem od lg w górę. */}
         <div aria-hidden="true" className="hidden lg:block lg:min-h-[34rem]" />
       </div>
-
-      {/* Na małych ekranach ten sam klip wraca jako pas pod tekstem — poza
-          kontenerem, żeby zajął pełną szerokość sekcji. */}
-      <HeroRunnerBand />
     </section>
   );
 }
