@@ -119,7 +119,7 @@ export const business: {
   homeVisits: {
     label: "Wizyty domowe",
     detail:
-      "Dojeżdżam do pacjenta, jeśli dotarcie do gabinetu jest utrudnione — " +
+      "Dojeżdżam do pacjenta, jeśli dotarcie do gabinetu jest utrudnione: " +
       "po zabiegu, przy ograniczonej samodzielności albo w opiece nad bliskim.",
   },
 
@@ -197,14 +197,14 @@ export const booking = {
   heading: "Umów wizytę",
   lead:
     "Wypełnij zgłoszenie, a odezwę się z potwierdzeniem terminu. Kalendarz poniżej " +
-    "pokazuje dni i godziny, w których przyjmuję — wybrany termin potwierdzam " +
+    "pokazuje dni i godziny, w których przyjmuję. Wybrany termin potwierdzam " +
     "osobiście, bo część godzin może być już zajęta.",
   /**
    * Informacja pod formularzem. Pacjent wpisuje dane o dolegliwościach,
    * więc musi wiedzieć, gdzie one trafiają.
    */
   privacyNote:
-    "Zgłoszenie wysyłasz bezpośrednio do mnie — WhatsAppem albo e-mailem, " +
+    "Zgłoszenie wysyłasz bezpośrednio do mnie, WhatsAppem albo e-mailem, " +
     "z twojego telefonu lub skrzynki. Strona niczego nie zapisuje ani nie wysyła " +
     "w tle. Dane służą wyłącznie do umówienia i przeprowadzenia wizyty. " +
     "Szczegóły w polityce prywatności.",
@@ -238,14 +238,14 @@ export const booking = {
     firstName: "Imię",
     lastName: "Nazwisko",
     complaint: "Krótki opis dolegliwości",
-    complaintHint: "Co boli, od kiedy i co to pogarsza — wystarczą dwa zdania.",
+    complaintHint: "Co boli, od kiedy i co to pogarsza. Wystarczą dwa zdania.",
     service: "Usługa",
     servicePlaceholder: "Wybierz usługę",
     date: "Data",
     time: "Godzina",
     submitWhatsApp: "Wyślij przez WhatsApp",
     submitEmail: "Wyślij e-mailem",
-    missingChannel: TODO("telefon lub e-mail — bez nich nie ma czym wysłać zgłoszenia"),
+    missingChannel: TODO("telefon lub e-mail, bez nich nie ma czym wysłać zgłoszenia"),
   },
 };
 
@@ -292,7 +292,7 @@ export const hero = {
     "Prowadzę terapię, która nie kończy się na chwilowej uldze. Szukamy przyczyny bólu, " +
     "usprawniamy to, co ją napędza, i budujemy ciało, które nie wraca do tego samego problemu.",
   bullets: [
-    "Wizyta 1:1 — w gabinecie w Markach lub u ciebie w domu",
+    "Wizyta 1:1 w gabinecie w Markach lub u ciebie w domu",
     "Terapia manualna połączona z pracą ruchem",
     "Konkretny plan na to, co robisz między wizytami",
   ],
@@ -310,7 +310,7 @@ export const hero = {
  */
 export const forWhom = {
   eyebrow: "Dla kogo",
-  heading: "Jeśli któryś z tych punktów brzmi znajomo — jesteś we właściwym miejscu",
+  heading: "Jeśli któryś z tych punktów brzmi znajomo, jesteś we właściwym miejscu",
   items: [
     {
       icon: "spine",
@@ -323,15 +323,15 @@ export const forWhom = {
       icon: "radiating",
       title: "Dyskopatia i promieniowanie",
       body:
-        "Ból schodzący do ręki lub nogi, drętwienie, mrowienie. Wymaga badania, " +
-        "a nie domysłów — i planu rozłożonego na tygodnie.",
+        "Ból schodzący do ręki lub nogi, drętwienie, mrowienie. Trzeba to zbadać " +
+        "i rozpisać plan na kilka tygodni.",
     },
     {
       icon: "sport",
       title: "Uraz sportowy",
       body:
-        "Chcesz wrócić do treningu i mieć pewność, że staw wytrzyma, " +
-        "a nie tylko przestać czuć ból.",
+        "Chcesz wrócić do treningu i mieć pewność, że staw wytrzyma obciążenie. " +
+        "Samo ustąpienie bólu ci nie wystarczy.",
     },
     {
       icon: "recovery",
@@ -365,8 +365,7 @@ export const services = {
   eyebrow: "Zakres opieki",
   heading: "Cztery obszary, w których pracuję",
   lead:
-    "Każda wizyta zaczyna się od badania. Dopiero z niego wynika, których narzędzi użyjemy — " +
-    "nie odwrotnie.",
+    "Każda wizyta zaczyna się od badania. To z niego wynika, jakich narzędzi użyjemy.",
   items: [
     {
       slug: "ortopedyczna",
@@ -386,7 +385,7 @@ export const services = {
       slug: "sportowa",
       title: "Fizjoterapia sportowa",
       summary:
-        "Przegląd techniczny dla ciała sportowca — i powrót do startów po tym, " +
+        "Przegląd techniczny dla ciała sportowca i powrót do startów po tym, " +
         "co już się wydarzyło.",
       points: [
         "Ocena deficytów zakresu ruchu limitujących twoje możliwości sportowe",
@@ -399,8 +398,8 @@ export const services = {
       slug: "postawa",
       title: "Ocena i korekta wad postawy",
       summary:
-        "Sprawdzamy, co naprawdę robi twoja sylwetka pod obciążeniem — " +
-        "i co da się z tym zrobić ruchem.",
+        "Sprawdzamy, co dzieje się z twoją sylwetką pod obciążeniem i co da się " +
+        "z tym zrobić ruchem.",
       points: [
         "Badanie ustawienia miednicy, kręgosłupa i obręczy barkowej",
         "Ocena, które wzorce są nawykiem, a które ograniczeniem strukturalnym",
@@ -413,8 +412,8 @@ export const services = {
       slug: "trening",
       title: "Trening personalny i prowadzenie online",
       summary:
-        "Trening prowadzony przez fizjoterapeutę, a nie przez trenera — " +
-        "z wiedzą o tym, co twoje tkanki faktycznie wytrzymają.",
+        "Trening prowadzony przez fizjoterapeutę, który wie, co twoje tkanki " +
+        "faktycznie wytrzymają.",
       points: [
         "Plan oparty na badaniu, nie na gotowym schemacie z internetu",
         "Nauka techniki i bezpiecznego obciążania",
@@ -431,25 +430,25 @@ export const services = {
     title: "Jak wygląda współpraca online",
     lead:
       "Nie musisz mieszkać w Markach, żeby pracować pod moją opieką. Prowadzenie " +
-      "zdalne opieram na tych samych zasadach co pracę w gabinecie — tylko kontakt " +
-      "przenosi się na telefon.",
+      "zdalne opieram na tych samych zasadach co pracę w gabinecie. Zmienia się " +
+      "tylko to, że kontakt przenosi się na telefon.",
     points: [
       {
         title: "Stały kontakt na WhatsAppie",
         body:
-          "Piszesz, kiedy masz wątpliwość — nie czekasz tygodnia na kolejną wizytę. " +
+          "Piszesz, kiedy masz wątpliwość, zamiast czekać tydzień na kolejną wizytę. " +
           "Nagrywasz serię, ja oceniam technikę i koryguję.",
       },
       {
         title: "Kontrola tego, co jesz",
         body:
           "Bez wysiłku po stronie kuchni trening nie dowiezie efektu. Pilnujemy tego " +
-          "razem, na konkretach, a nie na ogólnikach.",
+          "razem, na konkretnych posiłkach i liczbach.",
       },
       {
         title: "Plan aktualizowany na bieżąco",
         body:
-          "Progresja obciążeń idzie za tym, co faktycznie wykonujesz, a nie za kalendarzem.",
+          "Progresja obciążeń idzie za tym, co faktycznie wykonujesz na treningu.",
       },
     ],
   },
@@ -487,7 +486,7 @@ export const process = {
     {
       title: "Terapia",
       body:
-        "Praca manualna, ruch albo jedno i drugie — zależnie od tego, co wyszło z badania. " +
+        "Praca manualna, ruch albo jedno i drugie, zależnie od tego, co wyszło z badania. " +
         "Sprawdzamy efekt jeszcze na miejscu.",
     },
     {
@@ -498,7 +497,7 @@ export const process = {
     },
   ],
   note:
-    "Pierwsza wizyta trwa dłużej niż kolejne — większość tego czasu zajmuje badanie i rozmowa.",
+    "Pierwsza wizyta trwa dłużej niż kolejne. Większość tego czasu zajmuje badanie i rozmowa.",
 };
 
 /* ------------------------------------------------------------------ */
@@ -515,7 +514,7 @@ export const about = {
       "zarówno osoby zmagające się z bólem czy kontuzjami, jak i tych, którzy chcą zadbać " +
       "o profilaktykę i sprawność swojego ciała.",
     "Pracuję jeden na jeden i nie prowadzę dwóch osób naraz. Wizyta to rozmowa, badanie " +
-      "i terapia, a nie sam zabieg — chcę, żebyś wychodził wiedząc, co się dzieje z twoim " +
+      "i terapia, a nie sam zabieg. Chcę, żebyś wychodził wiedząc, co się dzieje z twoim " +
       "ciałem i co możesz z tym zrobić sam.",
   ],
   /** Puste = sekcja z wykształceniem i kursami się nie pokaże. */
@@ -542,7 +541,7 @@ export const portfolio = {
   eyebrow: "Efekty",
   heading: "Metamorfozy podopiecznych",
   lead:
-    "Zmiany, które udało się przeprowadzić razem z pacjentami — w gabinecie i w prowadzeniu online.",
+    "Zmiany, które udało się przeprowadzić razem z pacjentami w gabinecie i w prowadzeniu online.",
   items: [] as {
     name: string;
     context: string;
@@ -617,7 +616,7 @@ export const pricing = {
              pozycjach powyżej, gdzie wiersz łamią długie nazwy. */
           price: "200 zł + cena dojazdu",
           description:
-            "To samo co w gabinecie, tylko u ciebie — dla osób po zabiegu, " +
+            "To samo co w gabinecie, tylko u ciebie: dla osób po zabiegu, " +
             "z ograniczoną samodzielnością albo w opiece nad bliskim. Na terenie " +
             "Marek dojazd jest w cenie.",
         },
@@ -665,8 +664,8 @@ export const pricing = {
   expandHintPointer: "Najedź na pozycję, żeby zobaczyć opis",
   expandHintTouch: "Dotknij pozycji, żeby zobaczyć opis",
   footnote:
-    "Wizyta domowa na terenie Marek — dojazd w cenie. Poza Markami do stawki " +
-    "doliczany jest dojazd, ustalany indywidualnie.",
+    "Przy wizycie domowej na terenie Marek dojazd jest w cenie. Poza Markami " +
+    "do stawki doliczany jest dojazd, ustalany indywidualnie.",
 };
 
 /* ------------------------------------------------------------------ */
@@ -704,7 +703,7 @@ export const faq = {
         "W dwóch miejscach: w gabinecie w Markach przy ul. Kościuszki 59 oraz " +
         "w Klinice Sosnowej w Warszawie Wesołej przy Jeździeckiej 21F. Dojeżdżam też " +
         "do pacjenta do domu, jeśli dotarcie do gabinetu jest utrudnione. Zwróć uwagę, " +
-        "której lokalizacji dotyczy rezerwowany termin — Marki umawiam przez kalendarz " +
+        "której lokalizacji dotyczy rezerwowany termin. Marki umawiam przez kalendarz " +
         "na tej stronie, a Wesołą przez Booksy.",
     },
     {
@@ -713,33 +712,33 @@ export const faq = {
         "Nikt nie jest w stanie przewidzieć, ile potrzebnych będzie spotkań. Można bazować " +
         "na tym, ile to trwało u osób z podobnym problemem, ale trzeba pamiętać, że każdy " +
         "organizm jest inny. Dużo do powiedzenia mają też czynniki niezależne " +
-        "od fizjoterapeuty — styl życia, dieta, praca pacjenta i higiena snu.",
+        "od fizjoterapeuty: styl życia, dieta, praca pacjenta i higiena snu.",
     },
     {
       q: "W czym mam przyjść?",
       a:
-        "W wygodnym stroju, w którym swobodnie się poruszysz — koszulka i krótkie spodenki " +
+        "W wygodnym stroju, w którym swobodnie się poruszysz. Koszulka i krótkie spodenki " +
         "albo legginsy w zupełności wystarczą. Potrzebuję zobaczyć, jak pracuje okolica, " +
         "którą się zajmujemy.",
     },
     {
       q: "Zabrać ze sobą wyniki badań?",
       a:
-        "Jeśli masz RTG, USG, rezonans albo wypis ze szpitala — weź je ze sobą. " +
+        "Jeśli masz RTG, USG, rezonans albo wypis ze szpitala, weź je ze sobą. " +
         "Nie są konieczne do umówienia wizyty, ale bywają pomocne.",
     },
     {
       q: "Czym trening ze mną różni się od treningu z trenerem personalnym?",
       a:
         "Punktem wyjścia jest badanie fizjoterapeutyczne, a nie gotowy plan. Wiem, które " +
-        "struktury są po urazie, co wolno obciążać, a co jeszcze nie — i widzę, kiedy ból " +
-        "w trakcie serii jest sygnałem, że trzeba zmienić ćwiczenie, a nie zacisnąć zęby.",
+        "struktury są po urazie i co wolno obciążać. Widzę też, kiedy ból w trakcie serii " +
+        "jest sygnałem, że trzeba zmienić ćwiczenie, a nie zacisnąć zęby.",
     },
     {
       q: "Czy terapia boli?",
       a:
         "Niektóre techniki bywają nieprzyjemne, ale pracujemy w granicach, które akceptujesz. " +
-        "Ból nie jest miarą skuteczności — w każdej chwili mów, co czujesz.",
+        "Ból nie jest miarą skuteczności, więc w każdej chwili mów, co czujesz.",
     },
     {
       q: "Jak odwołać wizytę?",
@@ -758,8 +757,8 @@ export const contact = {
   eyebrow: "Kontakt",
   heading: "Umów wizytę",
   lead:
-    "Najszybciej przez telefon lub WhatsApp. Jeśli nie odbieram, jestem w trakcie wizyty — " +
-    "oddzwonię.",
+    "Najszybciej przez telefon lub WhatsApp. Jeśli nie odbieram, jestem w trakcie " +
+    "wizyty i oddzwonię.",
 };
 
 /* ------------------------------------------------------------------ */
@@ -785,7 +784,7 @@ export const bookingNavItem = { label: "Rezerwacja", href: "#rezerwacja" };
 export const seo = {
   /** Docelowy adres strony — potrzebny do metadanych i sitemap. */
   siteUrl: "https://letfit.pl",
-  title: "LETFIT — Mikołaj Letkiewicz | Fizjoterapeuta, Marki",
+  title: "LETFIT | Mikołaj Letkiewicz, fizjoterapeuta, Marki",
   description:
     "Fizjoterapia ortopedyczna i sportowa, korekta wad postawy oraz trening personalny " +
     "w Markach i z dojazdem do domu. Wizyty 1:1, badanie funkcjonalne i plan, " +

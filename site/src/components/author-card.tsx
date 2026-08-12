@@ -133,7 +133,7 @@ export function AuthorCard() {
           type="button"
           aria-expanded={open}
           aria-haspopup="menu"
-          aria-label={`Szczegóły wykonawcy — ${credit.label}`}
+          aria-label={`Szczegóły wykonawcy: ${credit.label}`}
           onClick={() => setOpen((v) => !v)}
           className="grid size-8 shrink-0 place-items-center rounded-btn text-ink-40 transition-colors hover:bg-mist hover:text-blue"
         >

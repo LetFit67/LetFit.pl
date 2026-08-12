@@ -41,7 +41,7 @@ export function Logo({ variant = "horizontal", className, priority }: LogoProps)
   return (
     <Image
       src={`/brand/${cfg.file}.png`}
-      alt="LetFit Physio — Mikołaj Letkiewicz, fizjoterapia"
+      alt="LetFit, Mikołaj Letkiewicz, fizjoterapia"
       width={cfg.w}
       height={cfg.h}
       className={className}

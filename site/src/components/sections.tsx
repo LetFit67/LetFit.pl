@@ -265,7 +265,7 @@ export function Portfolio() {
                 <div key={side.label} className="relative aspect-3/4 bg-mist-dim">
                   <Image
                     src={side.src}
-                    alt={`${item.name} — ${side.label.toLowerCase()}`}
+                    alt={`${item.name}, ${side.label.toLowerCase()}`}
                     fill
                     sizes="(max-width: 768px) 50vw, 20vw"
                     className="object-cover"

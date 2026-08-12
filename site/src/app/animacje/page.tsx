@@ -29,7 +29,7 @@ const OPTIONS = [
   {
     key: "C",
     name: "Pion postawy",
-    idea: "Punkty kostne — głowa, barki, miednica, kolana, stopy — zjeżdżają się do pionu odniesienia, a po chwili wracają do odchylenia.",
+    idea: "Punkty kostne (głowa, barki, miednica, kolana, stopy) zjeżdżają się do pionu odniesienia, a po chwili wracają do odchylenia.",
     reads: "Pokazuje ocenę i korektę postawy, czyli jedną z usług z cennika. Najbardziej „gabinetowy”, najmniej ozdobny.",
     Figure: PostureLine,
   },
@@ -47,7 +47,7 @@ export default function AnimationsPreviewPage() {
           Trzy propozycje grafiki do sekcji hero
         </h1>
         <p className="mt-5 max-w-2xl text-lg leading-relaxed text-ink-60">
-          Każda jest rysunkiem wektorowym z animacją CSS — ostra w każdej
+          Każda jest rysunkiem wektorowym z animacją CSS: ostra w każdej
           rozdzielczości, waży kilka kilobajtów i nie wymaga wczytywania wideo.
           Kadr odpowiada temu, co widać na stronie po prawej stronie tekstu.
         </p>
@@ -68,7 +68,7 @@ export default function AnimationsPreviewPage() {
         </div>
 
         <p className="mt-14 rounded-card border border-ink/12 bg-mist p-6 text-[15px] leading-relaxed text-ink-60">
-          To strona robocza — nie jest podlinkowana z nawigacji i ma ustawiony
+          To strona robocza. Nie jest podlinkowana z nawigacji i ma ustawiony
           zakaz indeksowania. Po wyborze wariantu wstawiam go do hero i usuwam tę
           stronę razem z dwoma niewykorzystanymi grafikami.
         </p>

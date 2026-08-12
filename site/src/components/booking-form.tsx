@@ -166,7 +166,7 @@ export function BookingForm() {
       window.open(`${waLink}?text=${encodeURIComponent(text)}`, "_blank", "noopener");
       return;
     }
-    const subject = `Zgłoszenie wizyty — ${firstName.trim()} ${lastName.trim()}`;
+    const subject = `Zgłoszenie wizyty: ${firstName.trim()} ${lastName.trim()}`;
     window.location.href = `mailto:${business.email}?subject=${encodeURIComponent(
       subject
     )}&body=${encodeURIComponent(text)}`;
@@ -382,7 +382,7 @@ export function BookingForm() {
         <div className="mt-8 border-t border-ink/10 pt-6">
           {showErrors && hasErrors && (
             <p id="zgloszenie-blad" className="mb-4 text-sm text-blue">
-              Uzupełnij zaznaczone pola — bez nich nie wiem, z czym i kiedy przychodzisz.
+              Uzupełnij zaznaczone pola. Bez nich nie wiem, z czym i kiedy przychodzisz.
             </p>
           )}
 

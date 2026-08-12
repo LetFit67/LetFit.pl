@@ -48,7 +48,7 @@ export function Header() {
       }`}
     >
       <div className="container-x flex h-20 items-center justify-between gap-6">
-        <a href="#top" aria-label="LETFIT — strona główna" className="shrink-0">
+        <a href="#top" aria-label="LETFIT, strona główna" className="shrink-0">
           <Logo variant="horizontal" className="h-12 w-auto md:h-14" priority />
         </a>
 

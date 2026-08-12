@@ -40,7 +40,7 @@ export function HeroFigure() {
     <svg
       viewBox="0 0 400 500"
       role="img"
-      aria-label="Schematyczny rysunek kręgosłupa wpisanego w okrąg — symbol pracy fizjoterapeutycznej"
+      aria-label="Schematyczny rysunek kręgosłupa wpisanego w okrąg, symbol pracy fizjoterapeutycznej"
       className="size-full text-blue"
     >
       {/* Przesunięcie wyśrodkowuje kompozycję w kadrze 4:5. */}

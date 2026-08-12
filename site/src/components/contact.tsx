@@ -200,7 +200,7 @@ function LocationCard({ location }: { location: Location }) {
         <div className="mt-6 overflow-hidden rounded-card border border-paper/15">
           <iframe
             src={location.mapsEmbedUrl}
-            title={`Mapa dojazdu — ${location.city}, ${location.street}`}
+            title={`Mapa dojazdu: ${location.city}, ${location.street}`}
             loading="lazy"
             referrerPolicy="no-referrer-when-downgrade"
             allowFullScreen

@@ -33,7 +33,7 @@ export function JsonLd() {
       if (!branchAddress) return undefined;
       return clean({
         "@type": "Physiotherapy",
-        name: loc.name || `${business.brand} — ${loc.city}`,
+        name: loc.name || `${business.brand} ${loc.city}`,
         address: branchAddress,
       });
     })
@@ -50,7 +50,7 @@ export function JsonLd() {
   const localBusiness = clean({
     "@context": "https://schema.org",
     "@type": "Physiotherapy",
-    name: `${business.brand} — ${business.person}`,
+    name: `${business.brand}, ${business.person}`,
     description: seo.description,
     url: seo.siteUrl,
     image: `${seo.siteUrl}/brand/letfit-avatar.svg`,
