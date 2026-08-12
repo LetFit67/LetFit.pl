@@ -1,6 +1,6 @@
-import { booking } from "@/content/site";
+import { booking, business } from "@/content/site";
 import { BookingForm } from "./booking-form";
-import { Eyebrow, Lead, SectionHeading } from "./ui";
+import { ButtonLink, CalendarIcon, Eyebrow, Lead, SectionHeading } from "./ui";
 
 /**
  * Sekcja zgłoszenia wizyty.
@@ -22,11 +22,28 @@ export function Booking() {
         <SectionHeading>{booking.heading}</SectionHeading>
         <Lead>{booking.lead}</Lead>
 
-        {booking.locationNote && (
-          <p className="mt-4 inline-flex rounded-btn border border-ink/15 bg-paper px-3 py-2 text-sm text-ink-60">
-            {booking.locationNote}
-          </p>
-        )}
+        {/* Notka o lokalizacji razem z wyjściem do Booksy. Bez przycisku
+            pacjent szukający terminu w Wesołej czytał, że ma rezerwować przez
+            Booksy, i nie miał w co kliknąć. */}
+        <div className="mt-5 flex flex-wrap items-center gap-3">
+          {booking.locationNote && (
+            <p className="rounded-btn border border-ink/15 bg-paper px-3 py-2 text-sm text-ink-60">
+              {booking.locationNote}
+            </p>
+          )}
+          {business.booksyUrl && booking.booksyLabel && (
+            <ButtonLink
+              href={business.booksyUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              variant="outline"
+              className="px-4 py-2.5"
+            >
+              <CalendarIcon />
+              {booking.booksyLabel}
+            </ButtonLink>
+          )}
+        </div>
 
         <BookingForm />
 

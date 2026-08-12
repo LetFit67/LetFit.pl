@@ -212,6 +212,15 @@ export const booking = {
   locationNote:
     "Formularz dotyczy gabinetu w Markach przy ul. Kościuszki 59 oraz wizyt domowych. " +
     "Terminy w Klinice Sosnowej rezerwujesz przez Booksy.",
+  /**
+   * Przycisk obok notki powyżej. Sama notka odsyłała pacjenta do Booksy
+   * słownie, ale nie było w co kliknąć — najbliższy odnośnik leżał dopiero
+   * w sekcji kontaktu, na końcu strony.
+   *
+   * Puste = przycisk się nie renderuje. Znika też sam, gdy `business.booksyUrl`
+   * jest pusty.
+   */
+  booksyLabel: "Rezerwuj w Klinice Sosnowej",
 
   /**
    * Grafik, z którego kalendarzyk buduje dostępne dni i godziny.
