@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState, useSyncExternalStore } from "react";
 import { booking, business, isTodo, pricing, waLink } from "@/content/site";
 
 /**
@@ -51,6 +51,25 @@ const toHHMM = (minutes: number) =>
 const longDate = (d: Date) =>
   `${WEEKDAYS[mondayIndex(d)]}, ${d.getDate()} ${MONTHS_IN[d.getMonth()]} ${d.getFullYear()}`;
 
+/* ------------------------------------------------------------------ */
+/* ZEGAR                                                               */
+/* ------------------------------------------------------------------ */
+
+/**
+ * „Teraz" odczytane raz, dopiero w przeglądarce.
+ *
+ * Na serwerze snapshot jest pusty, więc siatka kalendarza w ogóle się stamtąd
+ * nie renderuje i nie ma czego rozjechać przy hydratacji. W przeglądarce
+ * wartość liczy się przy pierwszym odczycie i zostaje zapamiętana: `getSnapshot`
+ * musi oddawać stabilny wynik, inaczej React wpada w pętlę renderów. Przy okazji
+ * „dzisiaj" nie przesunie się nikomu w trakcie wypełniania formularza
+ * tuż przed północą.
+ */
+let clientNow: number | null = null;
+const getClientNow = () => (clientNow ??= Date.now());
+const getServerNow = () => null;
+const subscribeNever = () => () => {};
+
 /** Wszystkie godziny z grafiku — niezależnie od tego, czy jeszcze nie minęły. */
 function allSlots() {
   const { from, to, stepMinutes } = booking.schedule;
@@ -62,19 +81,25 @@ function allSlots() {
 export function BookingForm() {
   /**
    * Kalendarz montujemy dopiero po stronie przeglądarki. „Dzisiaj” na serwerze
-   * i w przeglądarce to dwie różne chwile, a bywa też, że i dwie różne strefy —
-   * renderowanie siatki z serwera kończyłoby się rozjazdem przy hydratacji.
+   * i w przeglądarce to dwie różne chwile, a bywa też, że i dwie różne strefy,
+   * więc renderowanie siatki z serwera kończyłoby się rozjazdem przy hydratacji.
+   *
+   * Datę bierzemy z `useSyncExternalStore` (patrz „ZEGAR" wyżej), a nie
+   * ze stanu ustawianego w efekcie. Efekt dokładał render z pustą siatką
+   * i łamał regułę `set-state-in-effect`.
    */
-  const [today, setToday] = useState<Date | null>(null);
-  const [now, setNow] = useState<Date | null>(null);
-  const [month, setMonth] = useState<Date | null>(null);
+  const nowMs = useSyncExternalStore(subscribeNever, getClientNow, getServerNow);
 
-  useEffect(() => {
-    const t = new Date();
-    setNow(t);
-    setToday(startOfDay(t));
-    setMonth(new Date(t.getFullYear(), t.getMonth(), 1));
-  }, []);
+  const now = useMemo(() => (nowMs === null ? null : new Date(nowMs)), [nowMs]);
+  const today = useMemo(() => (now ? startOfDay(now) : null), [now]);
+
+  /* Wybór użytkownika w nagłówku kalendarza. Dopóki nikt nie przewijał
+     miesięcy, pokazujemy bieżący. */
+  const [monthPick, setMonthPick] = useState<Date | null>(null);
+  const month = useMemo(
+    () => monthPick ?? (today ? new Date(today.getFullYear(), today.getMonth(), 1) : null),
+    [monthPick, today]
+  );
 
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -286,7 +311,7 @@ export function BookingForm() {
               <button
                 type="button"
                 onClick={() =>
-                  setMonth(new Date(month.getFullYear(), month.getMonth() - 1, 1))
+                  setMonthPick(new Date(month.getFullYear(), month.getMonth() - 1, 1))
                 }
                 disabled={!canGoBack}
                 aria-label="Poprzedni miesiąc"
@@ -300,7 +325,7 @@ export function BookingForm() {
               <button
                 type="button"
                 onClick={() =>
-                  setMonth(new Date(month.getFullYear(), month.getMonth() + 1, 1))
+                  setMonthPick(new Date(month.getFullYear(), month.getMonth() + 1, 1))
                 }
                 disabled={!canGoForward}
                 aria-label="Następny miesiąc"
