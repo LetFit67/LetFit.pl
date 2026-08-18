@@ -1,7 +1,7 @@
-import type { CSSProperties } from "react";
 import Image from "next/image";
 import {
   about,
+  equipment,
   faq,
   forWhom,
   portfolio,
@@ -13,7 +13,8 @@ import {
 import { ExpandHint, HoverReveal } from "./hover-reveal";
 import { ForWhomGrid } from "./for-whom";
 import { PhotoPlaceholder } from "./hero";
-import { StaggerList } from "./stagger";
+import { ProcessMap } from "./process-map";
+import { TestimonialsRail } from "./testimonials-rail";
 import {
   ArrowIcon,
   CheckIcon,
@@ -135,6 +136,38 @@ export function Services() {
 }
 
 /* ------------------------------------------------------------------ */
+/* SPRZĘT                                                              */
+/* ------------------------------------------------------------------ */
+
+export function Equipment() {
+  // Bez wpisanego wyposażenia sekcja w ogóle się nie renderuje.
+  if (equipment.items.length === 0) return null;
+
+  return (
+    <Section id="sprzet" tone="mist">
+      <div>
+        <Eyebrow>{equipment.eyebrow}</Eyebrow>
+        <SectionHeading>{equipment.heading}</SectionHeading>
+        <Lead>{equipment.lead}</Lead>
+      </div>
+
+      {/* Lista, a nie kafle: to wyliczenie sprzętu, nie oferta do porównywania.
+          Zwarty układ nie sugeruje, że każde urządzenie to osobna usługa. */}
+      <ul className="mt-12 flex flex-wrap gap-2.5">
+        {equipment.items.map((item) => (
+          <li
+            key={item}
+            className="rounded-full border border-ink/12 bg-paper px-4 py-2 text-[14.5px] text-ink-80"
+          >
+            {item}
+          </li>
+        ))}
+      </ul>
+    </Section>
+  );
+}
+
+/* ------------------------------------------------------------------ */
 /* PRZEBIEG WIZYTY                                                     */
 /* ------------------------------------------------------------------ */
 
@@ -146,26 +179,9 @@ export function Process() {
         <SectionHeading>{process.heading}</SectionHeading>
       </div>
 
-      <StaggerList className="mt-14 grid gap-px overflow-hidden rounded-card bg-paper/20 sm:grid-cols-2 lg:grid-cols-4">
-        {process.steps.map((step, i) => (
-          <li key={step.title} className="bg-ink p-8">
-            {/* Animujemy zawartość, a nie kafel — kafle tworzą siatkę gap-px,
-                więc wygaszenie <li> odsłoniłoby jasne tło spod spodu. */}
-            <div className="stagger-item" style={{ "--i": i } as CSSProperties}>
-              <span
-                aria-hidden="true"
-                className="block font-display text-4xl leading-none font-semibold tabular-nums text-blue-bright"
-              >
-                {String(i + 1).padStart(2, "0")}
-              </span>
-              <h3 className="mt-5 text-lg font-semibold text-paper">{step.title}</h3>
-              <p className="mt-2.5 text-[15px] leading-relaxed text-paper/65">
-                {step.body}
-              </p>
-            </div>
-          </li>
-        ))}
-      </StaggerList>
+      {/* Etapy jako mapa: zygzak, przerywana ścieżka i strzałka, która
+          odsłania kolejne przystanki. Szczegóły w components/process-map.tsx. */}
+      <ProcessMap steps={process.steps} />
 
       {process.note && (
         <p className="mt-8 text-sm text-paper/55">{process.note}</p>
@@ -403,24 +419,12 @@ export function Testimonials() {
         <SectionHeading>{testimonials.heading}</SectionHeading>
       </div>
 
-      <div className="mt-14 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {testimonials.items.map((t) => (
-          <figure
-            key={t.author}
-            className="flex flex-col rounded-card border border-ink/12 bg-mist p-8"
-          >
-            <blockquote className="flex-1 text-[15px] leading-relaxed text-ink-80">
-              „{t.quote}”
-            </blockquote>
-            <figcaption className="mt-6 border-t border-ink/10 pt-4">
-              <span className="font-display text-sm font-semibold">{t.author}</span>
-              {t.context && (
-                <span className="mt-0.5 block text-xs text-ink-40">{t.context}</span>
-              )}
-            </figcaption>
-          </figure>
-        ))}
-      </div>
+      {/* Poziomy pas z kaskadą wejścia i zapalającymi się gwiazdkami —
+          components/testimonials-rail.tsx. */}
+      <TestimonialsRail
+        items={testimonials.items}
+        source={testimonials.source}
+      />
     </Section>
   );
 }

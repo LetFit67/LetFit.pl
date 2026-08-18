@@ -1,0 +1,1149 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LetFit — Mikołaj Letkiewicz | Fizjoterapia Marki</title>
+<meta name="description" content="Fizjoterapia ortopedyczna i sportowa w Markach. Terapia manualna połączona z pracą ruchem, plan na to, co robisz między wizytami.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    /* Paleta LetFit (globals.css) osadzona w układzie jasnoszarym wzorem Ventriloc. */
+    --ink:#0a1433;
+    --ink-80:#26325a;
+    --ink-60:#4c587a;
+    --ink-40:#7f89a4;
+    --paper:#ffffff;
+    --shell:#f1f5fb;
+    --mist-dim:#e7eef8;
+    --blue:#10428f;
+    --blue-deep:#0a2c63;
+    --blue-bright:#7fb0f2;
+    --blue-soft:#e3ebf7;
+    --line:rgba(10,20,51,0.10);
+
+    --display:'Inter', system-ui, sans-serif;
+    --body:'Inter', system-ui, sans-serif;
+    --mono:'IBM Plex Mono', monospace;
+
+    /* Rytm animacji — jedno miejsce, z którego korzysta hero i sekcje. */
+    --word-step:70ms;
+    --word-dur:700ms;
+    --ease:cubic-bezier(.22,.61,.36,1);
+  }
+
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html{scroll-behavior:smooth;scroll-padding-top:6rem;}
+  body{
+    background:var(--shell);color:var(--ink);
+    font-family:var(--body);line-height:1.55;
+    -webkit-font-smoothing:antialiased;text-wrap:pretty;
+    /*
+      `clip`, nie `hidden`. `overflow-x:hidden` na body robi z niego kontener
+      przewijania (overflow-y przeskakuje na auto), a wtedy karty
+      `position:sticky` w sekcji usług przyklejają się do body zamiast do okna
+      i cały stos się rozjeżdża. `clip` przycina, ale kontenera nie tworzy.
+    */
+    overflow-x:clip;
+  }
+  a{color:inherit;text-decoration:none;}
+  img,video{max-width:100%;display:block;}
+  .wrap{max-width:1240px;margin:0 auto;padding:0 40px;}
+  :focus-visible{outline:2px solid var(--blue);outline-offset:3px;}
+
+  /*
+    NAGŁÓWKI W STYLU VENTRILOC — duże, LEKKIE (400), ciasna interlinia
+    i ujemny tracking. To nie jest ozdobnik: przy wadze 600 ten rozmiar
+    robi się krzykliwy, a przy 400 czyta się jak zdanie, nie jak hasło.
+  */
+  h1,h2,h3{font-family:var(--display);font-weight:400;letter-spacing:-0.022em;line-height:0.94;text-wrap:balance;}
+
+  /*
+    REVEAL SŁOWO PO SŁOWIE.
+
+    Każde słowo to `.word` (maska) z `.word > i` w środku (nośnik ruchu).
+    Słowo wjeżdża spod własnej krawędzi, więc widać wypływanie, a nie
+    wygaszanie. Stanem SPOCZYNKOWYM jest pozycja docelowa — dopóki skrypt
+    nie oznaczy bloku jako `pending`, tekst po prostu stoi na miejscu.
+    Dzięki temu bez JS-u, przy zamrożonej osi czasu i pod czytnikiem ekranu
+    nagłówek jest w całości czytelny.
+  */
+  .word{display:inline-flex;overflow:hidden;vertical-align:top;padding-block:0.12em;margin-block:-0.12em;}
+  .word > i{display:inline-block;font-style:inherit;transform:none;}
+
+  /*
+    UWAGA NA ZAMROŻONĄ OŚ CZASU.
+
+    Maska `overflow:hidden` sprawia, że stan ukryty jest TOTALNY — inaczej
+    niż w globals.css strony głównej, gdzie wejście to przesunięcie o 0.9rem
+    i najgorszym skutkiem jest tekst odsunięty o kilkanaście pikseli.
+    Tutaj zamrożony stan początkowy oznaczałby PUSTY nagłówek.
+
+    Dlatego stanem bazowym `.word > i` jest pozycja docelowa (patrz wyżej),
+    a stan ukryty pojawia się WYŁĄCZNIE wtedy, gdy skrypt go założy —
+    i skrypt sam zdejmuje go po chwili bezpiecznikiem na setTimeout, który
+    działa także w karcie w tle, w odróżnieniu od requestAnimationFrame.
+  */
+  [data-reveal="pending"] .word > i{transform:translateY(105%);}
+  [data-reveal="in"] .word > i{
+    transform:none;
+    transition:transform var(--word-dur) var(--ease);
+    transition-delay:calc(var(--i,0) * var(--word-step));
+  }
+  /* Odsłonięcie awaryjne: stan końcowy BEZ przejścia. Przejście potrzebuje
+     upływu czasu, a przy zamrożonej osi czasu zostawiłoby tekst pod maską. */
+  [data-reveal="instant"] .word > i{transform:none;transition:none;}
+
+  /* ---------- NAV ---------- */
+  header.nav{
+    position:sticky;top:0;z-index:60;
+    background:rgba(241,245,251,0.86);backdrop-filter:blur(12px);
+    border-bottom:1px solid var(--line);
+  }
+  .nav-inner{display:flex;align-items:center;justify-content:space-between;gap:24px;
+    max-width:1240px;margin:0 auto;padding:14px 40px;}
+  .logo img{height:38px;width:auto;}
+  nav.links{display:flex;gap:30px;align-items:center;}
+  nav.links a{font-size:14px;color:var(--ink-60);transition:color .2s ease;}
+  nav.links a:hover{color:var(--ink);}
+  /*
+    PRZYCISK — ruchoma otoczka i przewijana etykieta.
+
+    Budowa przeniesiona z ventriloc.ca: pigułka z `overflow:clip`, w środku
+    warstwa tła `.btn__bg`, a właściwe wypełnienie siedzi w jej `::before`.
+    Ten pseudoelement zjeżdża pod dolną krawędź, a nowy kolor wjeżdża od góry,
+    więc otoczka „przetacza się" przez przycisk zamiast zmieniać kolor skokiem.
+
+    Etykieta jedzie równolegle: każde słowo ma kopię pod spodem i przy najechaniu
+    oryginał wychodzi górą, a duplikat wchodzi dołem — z tym samym krokiem 70 ms
+    co reveal nagłówków, żeby oba ruchy na stronie miały wspólny rytm.
+
+    Wszystko rusza się WYŁĄCZNIE na :hover / :focus, więc zamrożona oś czasu
+    nie ma tu czego zepsuć — przycisk w spoczynku jest kompletny.
+  */
+  .btn{
+    --btn-bg:var(--ink);
+    --btn-bg-hover:var(--blue);
+    --btn-fg:var(--paper);
+    position:relative;overflow:clip;isolation:isolate;
+    display:inline-flex;align-items:center;gap:9px;
+    padding:14px 26px;font-size:14px;font-weight:500;
+    color:var(--btn-fg);background:transparent;border:none;
+    border-radius:999px;cursor:pointer;
+    transition:color .3s var(--ease);
+  }
+  .btn__bg{position:absolute;inset:0;z-index:-1;border-radius:inherit;overflow:clip;}
+  .btn__bg::before{
+    content:"";position:absolute;inset:0;border-radius:inherit;
+    background:var(--btn-bg);
+    transition:transform .5s var(--ease);
+  }
+  .btn__bg::after{
+    content:"";position:absolute;inset:0;border-radius:inherit;
+    background:var(--btn-bg-hover);
+    transform:translateY(-100%);
+    transition:transform .5s var(--ease);
+  }
+  .btn:hover .btn__bg::before,.btn:focus-visible .btn__bg::before{transform:translateY(100%);}
+  .btn:hover .btn__bg::after,.btn:focus-visible .btn__bg::after{transform:none;}
+
+  /* Etykieta rozbita na słowa — oryginał i kopia w jednej komórce siatki. */
+  .btn__label{display:inline-flex;gap:.32em;}
+  .btn__label .word{display:inline-grid;overflow:hidden;padding-block:.14em;margin-block:-.14em;}
+  .btn__label .word > i,.btn__label .word > b{
+    grid-area:1/1;font-style:normal;font-weight:inherit;
+    transition:transform .44s var(--ease);
+    transition-delay:calc(var(--i,0) * 70ms);
+  }
+  .btn__label .word > b{transform:translateY(100%);}
+  .btn:hover .btn__label .word > i,.btn:focus-visible .btn__label .word > i{transform:translateY(-100%);}
+  .btn:hover .btn__label .word > b,.btn:focus-visible .btn__label .word > b{transform:none;}
+
+  /* Wariant obrysowany — otoczka wypełnia go dopiero przy najechaniu. */
+  .btn-ghost{
+    --btn-bg:transparent;
+    --btn-bg-hover:var(--ink);
+    --btn-fg:var(--ink);
+    box-shadow:inset 0 0 0 1px rgba(10,20,51,0.25);
+  }
+  .btn-ghost:hover,.btn-ghost:focus-visible{color:var(--paper);}
+  .menu-toggle{display:none;background:none;border:none;cursor:pointer;padding:6px;}
+  .menu-toggle span{display:block;width:22px;height:1px;background:var(--ink);margin:6px 0;}
+
+  /* ---------- HERO ---------- */
+  .hero{position:relative;overflow:hidden;background:var(--shell);}
+  /* padding-block, nie skrót `padding` — element ma też klasę .wrap,
+     a skrót zerowałby jej padding poziomy i tekst uciekał do krawędzi. */
+  .hero-inner{position:relative;z-index:3;padding-block:96px 88px;}
+
+  /* Klip z biegaczem — warstwa przy prawej krawędzi (desktop).
+     Wchodzi wolniej niż tekst i pod niego, żeby nie ścigał się z rewealem. */
+  .runner-desktop{
+    position:absolute;top:0;bottom:0;right:0;width:54%;z-index:1;overflow:hidden;
+    pointer-events:none;user-select:none;
+    -webkit-mask-image:linear-gradient(to right,transparent 0%,rgba(0,0,0,0.16) 36%,#000 70%),linear-gradient(to bottom,transparent 0%,#000 16%,#000 78%,transparent 100%);
+    mask-image:linear-gradient(to right,transparent 0%,rgba(0,0,0,0.16) 36%,#000 70%),linear-gradient(to bottom,transparent 0%,#000 16%,#000 78%,transparent 100%);
+    -webkit-mask-composite:source-in;mask-composite:intersect;
+    opacity:0;animation:runner-in 1400ms var(--ease) 240ms forwards;
+  }
+  @keyframes runner-in{from{opacity:0;transform:scale(1.04);}to{opacity:1;transform:none;}}
+  .runner-desktop video{width:100%;height:100%;object-fit:cover;transform:scale(1.05);filter:blur(2px);}
+  .runner-desktop .veil-paper{position:absolute;inset:0;background:rgba(241,245,251,0.5);}
+  .runner-desktop .veil-blue{position:absolute;inset:0;background:rgba(16,66,143,0.10);mix-blend-mode:multiply;}
+
+  /* Ten sam klip na telefonie: tło całej sekcji, pod tekstem. */
+  .runner-mobile{
+    display:none;position:absolute;inset:0;z-index:1;overflow:hidden;pointer-events:none;user-select:none;
+    -webkit-mask-image:linear-gradient(to bottom,transparent 0%,#000 24%,#000 84%,transparent 100%);
+    mask-image:linear-gradient(to bottom,transparent 0%,#000 24%,#000 84%,transparent 100%);
+    opacity:0;animation:runner-in 1400ms var(--ease) 240ms forwards;
+  }
+  .runner-mobile video{width:100%;height:100%;object-fit:cover;transform:scale(1.05);filter:blur(3px);}
+  .runner-mobile .veil-paper{position:absolute;inset:0;
+    background:linear-gradient(to bottom,rgba(241,245,251,0.88),rgba(241,245,251,0.66),rgba(241,245,251,0.78));}
+  .runner-mobile .veil-blue{position:absolute;inset:0;background:rgba(16,66,143,0.10);mix-blend-mode:multiply;}
+
+  /* Znak wodny z sygnetu — oddycha, wchodzi na końcu sekwencji. */
+  .hero-mark{
+    position:absolute;top:40px;right:44px;width:19rem;z-index:2;
+    mix-blend-mode:multiply;pointer-events:none;user-select:none;opacity:0;
+    animation:mark-in 900ms var(--ease) 1100ms forwards, breathe 9s ease-in-out 2000ms infinite;
+  }
+  @keyframes mark-in{from{opacity:0;transform:scale(.96);}to{opacity:.14;transform:none;}}
+  @keyframes breathe{0%,100%{opacity:.12;transform:scale(1);}50%{opacity:.18;transform:scale(1.03);}}
+
+  .eyebrow{
+    font-family:var(--mono);font-size:11.5px;letter-spacing:0.16em;text-transform:uppercase;
+    color:var(--blue);display:flex;align-items:center;gap:12px;margin-bottom:30px;
+  }
+  .eyebrow::before{content:"";width:28px;height:1px;background:currentColor;}
+
+  /*
+    Dolna granica to nie kwestia gustu: przy 375 px na tekst zostaje 327 px,
+    a najdłuższy wariant rotacji („którego ci brakuje") ma przy 42 px aż
+    341 px i łamie się na dwa wiersze, rozpychając nagłówek. 38 px mieści
+    każdy wariant z zapasem — zmierzone, nie policzone na znaki.
+  */
+  h1.hero-title{
+    font-size:clamp(38px,6.4vw,88px);
+    max-width:16ch;margin-bottom:34px;
+  }
+  /* Rotujący fragment siedzi w tej samej linii co reszta nagłówka.
+     Rozpórka z najdłuższym wariantem trzyma szerokość, więc podmiana
+     nie przesuwa niczego pod spodem. */
+  .swap{display:inline-grid;vertical-align:top;}
+  .swap-strut{grid-area:1/1;visibility:hidden;}
+  /*
+    Stanem bazowym jest pełna widoczność — animacji NIE ma tu domyślnie.
+    Gdyby była, zamrożona oś czasu zatrzymałaby ją na klatce zerowej
+    (opacity 0) i fragment zniknąłby z nagłówka. Ruch dokłada dopiero
+    klasa nadawana przy podmianie, czyli w sytuacji, w której zegar
+    z definicji chodzi.
+  */
+  .swap-live{grid-area:1/1;color:var(--blue);}
+  .swap-live.is-swapping{animation:swap-in 640ms var(--ease);}
+  @keyframes swap-in{from{opacity:0;transform:translateY(.14em);}to{opacity:1;transform:none;}}
+
+  .hero-sub{font-size:18px;color:var(--ink-60);max-width:36rem;margin-bottom:34px;font-weight:300;}
+  .hero-bullets{list-style:none;display:grid;gap:13px;margin-bottom:40px;max-width:34rem;}
+  .hero-bullets li{display:flex;gap:13px;align-items:flex-start;font-size:15px;color:var(--ink-80);}
+  .hero-bullets svg{flex-shrink:0;margin-top:4px;color:var(--blue);}
+  .hero-cta{display:flex;gap:12px;flex-wrap:wrap;}
+
+  /* Elementy pod nagłówkiem wchodzą tą samą krzywą, w rytmie rewealu. */
+  .fade-up{opacity:0;transform:translateY(14px);
+    animation:fade-up 800ms var(--ease) forwards;animation-delay:var(--d,0ms);}
+  @keyframes fade-up{to{opacity:1;transform:none;}}
+
+  /* ---------- PASEK WSPÓŁPRACY ---------- */
+  .collab{background:var(--ink);color:var(--paper);padding:0;overflow:hidden;
+    border-block:1px solid var(--ink);}
+  .collab-track{display:inline-flex;white-space:nowrap;padding:16px 0;animation:marquee 34s linear infinite;}
+  .collab-track span{font-family:var(--mono);font-size:12.5px;letter-spacing:.1em;text-transform:uppercase;
+    padding:0 30px;opacity:.85;}
+  .collab-track span::after{content:"·";margin-left:30px;color:var(--blue-bright);}
+  @keyframes marquee{from{transform:translateX(0);}to{transform:translateX(-50%);}}
+
+  /* ---------- SEKCJE ---------- */
+  section{padding:120px 0;}
+  section.on-white{background:var(--paper);}
+
+  /*
+    NAKŁADANIE CAŁYCH SEKCJI.
+
+    Każda sekcja przykleja się do górnej krawędzi okna, a następna — nieprzezroczysta
+    i z wyższą warstwą — wjeżdża na nią. Sekcja pod spodem nie znika skokowo: gaśnie,
+    lekko się oddala i rozmywa, w miarę jak kolejna ją zakrywa.
+
+    Postęp wygaszania liczy skrypt z POŁOŻENIA następnej sekcji, a nie z upływu czasu.
+    To celowe: dzięki temu ruch jest w pełni odwracalny — przy przewijaniu w górę
+    sekcja wraca dokładnie tą samą drogą, klatka po klatce. Animacja czasowa
+    musiałaby się „odgrywać wstecz", a tu po prostu nie ma czego odgrywać.
+
+    Stan spoczynkowy (--fade: 1) to sekcja w pełni widoczna, więc gdy skrypt nie
+    wystartuje albo oś czasu dokumentu stoi, strona jest normalnie czytelna.
+  */
+  [data-stack]{
+    position:sticky;
+    /*
+      Punkt przyklejenia ustawia skrypt (`--top`), bo zależy od wysokości
+      KONKRETNEJ sekcji. Sekcja niższa od okna klei się górą (0). Sekcja
+      wyższa musi kleić się dołem — inaczej przywiera górną krawędzią,
+      a jej dolna część zostaje pod krawędzią okna i nie da się do niej
+      dojechać. W CSS tego nie policzymy: procenty w `top` odnoszą się do
+      bloku zawierającego, a nie do wysokości samego elementu.
+    */
+    top:var(--top,0px);
+    z-index:calc(var(--n,0) + 1);
+    background:var(--shell);
+    min-height:100vh;
+    display:flex;flex-direction:column;justify-content:center;
+    opacity:var(--fade,1);
+    transform:translateY(var(--ty,0px)) scale(var(--sc,1));
+    transform-origin:center 34%;
+    will-change:opacity,transform;
+  }
+  [data-stack].on-white{background:var(--paper);}
+
+  /* Nagłówki sekcji — mają dominować nad treścią, tak jak na wzorcowej stronie. */
+  .section-head{margin-bottom:72px;max-width:64rem;}
+  .section-head .eyebrow{margin-bottom:28px;}
+  h2.section-title{font-size:clamp(40px,7.4vw,104px);line-height:0.9;letter-spacing:-0.03em;}
+  .section-head > p{color:var(--ink-60);font-size:17px;max-width:40rem;margin-top:32px;font-weight:300;}
+
+  /* ---------- DLA KOGO ---------- */
+  .who-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border:1px solid var(--line);}
+  .who-card{background:var(--paper);padding:36px 32px;transition:background .3s ease;}
+  .who-card:hover{background:var(--blue-soft);}
+  .who-num{font-family:var(--mono);font-size:11.5px;color:var(--blue);margin-bottom:22px;letter-spacing:.08em;}
+  .who-card h3{font-size:20px;margin-bottom:12px;}
+  .who-card p{font-size:14.5px;color:var(--ink-60);font-weight:300;}
+
+  /* ---------- ZAKRES OPIEKI — zwykłe karty ----------
+     Nakładanie przeniosło się na poziom całych sekcji (patrz [data-stack]),
+     więc tutaj karty są już statyczne. Dwa zagnieżdżone stosy sticky biłyby
+     się o ten sam obszar przewijania. */
+  .svc-row{
+    background:var(--paper);
+    border:1px solid var(--line);
+    padding:40px;
+    margin-bottom:20px;
+    display:grid;grid-template-columns:auto 1fr 1.1fr;gap:44px;align-items:start;
+    transition:border-color .3s ease;
+  }
+  .svc-row:hover{border-color:rgba(16,66,143,0.35);}
+  .svc-row:last-child{margin-bottom:0;}
+  .svc-num{font-family:var(--mono);font-size:13px;color:var(--blue);padding-top:8px;min-width:3ch;}
+  .svc-row h3{font-size:clamp(22px,2.6vw,34px);}
+  .svc-body p{font-size:15px;color:var(--ink-60);margin-bottom:18px;font-weight:300;}
+  .svc-list{list-style:none;display:grid;gap:9px;}
+  .svc-list li{font-size:14px;color:var(--ink-60);display:flex;gap:11px;font-weight:300;}
+  .svc-list li::before{content:"—";color:var(--blue);flex-shrink:0;}
+
+  /* ---------- PRZEBIEG ---------- */
+  .process{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);border:1px solid var(--line);}
+  .step{background:var(--paper);padding:36px 30px;transition:background .3s ease;}
+  .step:hover{background:var(--blue-soft);}
+  .step-num{font-family:var(--mono);font-size:11.5px;color:var(--blue);margin-bottom:22px;letter-spacing:.08em;}
+  .step h3{font-size:19px;margin-bottom:12px;}
+  .step p{font-size:14px;color:var(--ink-60);font-weight:300;}
+  .process-note{margin-top:32px;font-size:14.5px;color:var(--ink-60);font-weight:300;}
+
+  /* ---------- O MNIE ---------- */
+  .about{display:grid;grid-template-columns:1.15fr .85fr;gap:64px;align-items:start;}
+  .about p{font-size:17.5px;color:var(--ink-60);margin-bottom:22px;font-weight:300;}
+  .about-side{border:1px solid var(--line);padding:32px;background:var(--shell);}
+  .about-side h3{font-size:17px;margin-bottom:16px;}
+  .about-side > p{font-size:14.5px;margin-bottom:22px;}
+  .about-side .row{display:flex;justify-content:space-between;gap:16px;padding:13px 0;border-top:1px solid var(--line);font-size:14px;}
+  .about-side .k{color:var(--ink-60);font-weight:300;}
+  .about-side .v{font-weight:500;text-align:right;}
+
+  /* ---------- CENNIK ---------- */
+  .price-group{margin-bottom:48px;}
+  .price-group h3{font-family:var(--mono);font-size:12px;font-weight:500;text-transform:uppercase;
+    letter-spacing:.12em;color:var(--blue);margin-bottom:6px;}
+  .price-item{border-top:1px solid var(--line);}
+  .price-group .price-item:last-child{border-bottom:1px solid var(--line);}
+  .price-item summary{
+    display:flex;justify-content:space-between;align-items:baseline;gap:20px;flex-wrap:wrap;
+    padding:22px 4px;cursor:pointer;list-style:none;transition:padding-inline .25s ease,background .25s ease;
+  }
+  .price-item summary::-webkit-details-marker{display:none;}
+  .price-item summary:hover{background:var(--blue-soft);padding-inline:16px;}
+  .price-name{font-size:17px;font-weight:400;}
+  .price-dur{font-family:var(--mono);font-size:12px;color:var(--ink-40);margin-left:12px;}
+  .price-val{font-family:var(--mono);font-size:16px;color:var(--blue);margin-left:auto;}
+  .price-item p{padding:0 4px 24px;font-size:14.5px;color:var(--ink-60);max-width:48rem;font-weight:300;}
+  .price-foot{font-size:14px;color:var(--ink-60);font-weight:300;}
+
+  /* ---------- FAQ ---------- */
+  .faq-item{border-top:1px solid var(--line);}
+  .faq-list .faq-item:last-child{border-bottom:1px solid var(--line);}
+  .faq-item summary{padding:24px 4px;cursor:pointer;font-size:18px;list-style:none;
+    transition:padding-inline .25s ease,background .25s ease;}
+  .faq-item summary::-webkit-details-marker{display:none;}
+  .faq-item summary:hover{background:var(--blue-soft);padding-inline:16px;}
+  .faq-item p{padding:0 4px 26px;font-size:15px;color:var(--ink-60);max-width:52rem;font-weight:300;}
+
+  /* ---------- CTA ---------- */
+  .cta-band{background:var(--ink);color:var(--paper);padding:130px 0;}
+  .cta-band h2{font-size:clamp(32px,5.4vw,68px);max-width:18ch;margin-bottom:32px;}
+  .cta-band h2 em{font-style:normal;color:var(--blue-bright);}
+  .cta-band p{color:rgba(255,255,255,0.66);max-width:34rem;margin-bottom:40px;font-size:16.5px;font-weight:300;}
+  .cta-actions{display:flex;gap:12px;flex-wrap:wrap;}
+  .cta-band .btn{--btn-bg:var(--paper);--btn-bg-hover:var(--blue-bright);--btn-fg:var(--ink);}
+  .cta-band .btn:hover,.cta-band .btn:focus-visible{color:var(--ink);}
+  .cta-band .btn-ghost{
+    --btn-bg:transparent;--btn-bg-hover:var(--paper);--btn-fg:var(--paper);
+    box-shadow:inset 0 0 0 1px rgba(255,255,255,0.35);
+  }
+  .cta-band .btn-ghost:hover,.cta-band .btn-ghost:focus-visible{color:var(--ink);}
+
+  /* ---------- KONTAKT ---------- */
+  .loc-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:1px;background:var(--line);
+    border:1px solid var(--line);margin-bottom:48px;}
+  .loc-card{background:var(--paper);padding:40px 36px;}
+  .loc-badge{display:inline-block;font-family:var(--mono);font-size:10.5px;text-transform:uppercase;
+    letter-spacing:.12em;color:var(--blue);margin-bottom:18px;}
+  .loc-card h3{font-size:26px;margin-bottom:10px;}
+  .loc-addr{font-size:15.5px;color:var(--ink-80);margin-bottom:14px;}
+  .loc-hint{font-size:14px;color:var(--ink-60);margin-bottom:18px;font-weight:300;}
+  .loc-hours{font-family:var(--mono);font-size:12.5px;color:var(--ink-60);margin-bottom:24px;}
+  .loc-actions{display:flex;gap:10px;flex-wrap:wrap;}
+  .contact-rows .row{display:flex;justify-content:space-between;gap:16px;padding:20px 0;
+    border-top:1px solid var(--line);flex-wrap:wrap;}
+  .contact-rows .row:last-child{border-bottom:1px solid var(--line);}
+  .contact-rows .k{font-family:var(--mono);font-size:11.5px;color:var(--ink-60);text-transform:uppercase;letter-spacing:.08em;}
+  .contact-rows .v{font-size:16px;}
+  .contact-rows .v a:hover{color:var(--blue);}
+  .todo{background:#fdf0ee;color:#8f2c1e;font-family:var(--mono);font-size:12px;padding:3px 9px;}
+
+  /* ---------- FOOTER ---------- */
+  footer{background:var(--paper);border-top:1px solid var(--line);padding:48px 0;}
+  .footer-inner{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:22px;}
+  .footer-inner img{height:32px;width:auto;}
+  .footer-links{display:flex;gap:24px;font-size:13.5px;color:var(--ink-60);flex-wrap:wrap;}
+  .footer-links a:hover{color:var(--ink);}
+
+  /* ---------- RESPONSIVE ---------- */
+  @media (max-width:1023px){
+    .runner-desktop,.hero-mark{display:none;}
+    .runner-mobile{display:block;}
+    .hero-inner{padding:64px 0 72px;}
+    .svc-row{grid-template-columns:auto 1fr;gap:24px;}
+    .svc-body{grid-column:2;}
+  }
+  @media (max-width:920px){
+    .wrap,.nav-inner{padding-inline:24px;}
+    nav.links{display:none;}
+    .menu-toggle{display:block;}
+    .who-grid,.process,.loc-grid,.about{grid-template-columns:1fr;}
+    section{padding:80px 0;}
+    .cta-band{padding:90px 0;}
+  }
+
+  /* Kto prosi o mniej ruchu, dostaje statyczną stronę. */
+  @media (prefers-reduced-motion: reduce){
+    html{scroll-behavior:auto;}
+    *,*::before,*::after{animation-duration:.01ms !important;animation-iteration-count:1 !important;transition-duration:.01ms !important;}
+    .fade-up{opacity:1;transform:none;}
+    .runner-desktop,.runner-mobile{opacity:1;}
+    .hero-mark{opacity:.14;}
+    [data-reveal] .word > i{transform:none !important;}
+    /* Sekcje przestają się nakładać — wracają do zwykłego przewijania. */
+    [data-stack]{
+      position:static;opacity:1;transform:none;min-height:0;display:block;
+    }
+  }
+</style>
+</head>
+<body>
+
+<header class="nav">
+  <div class="nav-inner">
+    <a href="#top" class="logo" aria-label="LetFit — strona główna">
+      <img src="/brand/letfit-horizontal.png" alt="LetFit Physio">
+    </a>
+    <nav class="links">
+      <a href="#dla-kogo">Dla kogo</a>
+      <a href="#uslugi">Zakres opieki</a>
+      <a href="#przebieg">Przebieg wizyty</a>
+      <a href="#o-mnie">O mnie</a>
+      <a href="#cennik">Cennik</a>
+      <a href="#kontakt">Kontakt</a>
+    </nav>
+    <a href="#kontakt" class="btn">Umów wizytę</a>
+    <button class="menu-toggle" aria-label="Menu"><span></span><span></span><span></span></button>
+  </div>
+</header>
+
+<main id="top">
+
+  <!-- HERO -->
+  <div class="hero" data-stack style="--n:0;">
+    <div class="runner-desktop" aria-hidden="true">
+      <video src="/video/hero-runner.mp4" poster="/video/hero-runner.jpg" autoplay muted loop playsinline preload="metadata"></video>
+      <div class="veil-paper"></div>
+      <div class="veil-blue"></div>
+    </div>
+    <div class="runner-mobile" aria-hidden="true">
+      <video src="/video/hero-runner.mp4" poster="/video/hero-runner.jpg" autoplay muted loop playsinline preload="metadata"></video>
+      <div class="veil-paper"></div>
+      <div class="veil-blue"></div>
+    </div>
+
+    <img class="hero-mark" src="/brand/letfit-mark.png" alt="" aria-hidden="true">
+
+    <div class="wrap hero-inner">
+      <p class="eyebrow fade-up" style="--d:120ms;">Fizjoterapia ortopedyczna i sportowa · Marki</p>
+
+      <!--
+        Nagłówek rozbity na słowa. Ostatni fragment jest rotujący — jego
+        rozpórka bierze udział w rewealu jak każde inne słowo, więc linia
+        układa się od razu w docelowej szerokości.
+      -->
+      <h1 class="hero-title" data-hero-reveal>
+        <span class="sr-only" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);">Wróć do ruchu, którego ci brakuje</span>
+        <span aria-hidden="true" data-words>Wróć do ruchu,</span
+        ><span aria-hidden="true" class="word" style="--i:3;"><i><span class="swap">
+          <span class="swap-strut">którego ci brakuje</span>
+          <span class="swap-live" id="swapLine">którego ci brakuje</span>
+        </span></i></span>
+      </h1>
+
+      <p class="hero-sub fade-up" style="--d:760ms;">Prowadzę terapię, która nie kończy się na chwilowej uldze. Szukamy przyczyny bólu, usprawniamy to, co ją napędza, i budujemy ciało, które nie wraca do tego samego problemu.</p>
+
+      <ul class="hero-bullets">
+        <li class="fade-up" style="--d:860ms;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>Wizyta 1:1 w gabinecie w Markach lub u ciebie w domu</li>
+        <li class="fade-up" style="--d:930ms;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>Terapia manualna połączona z pracą ruchem</li>
+        <li class="fade-up" style="--d:1000ms;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>Konkretny plan na to, co robisz między wizytami</li>
+      </ul>
+
+      <div class="hero-cta fade-up" style="--d:1100ms;">
+        <a href="#kontakt" class="btn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="18"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+          Umów wizytę
+        </a>
+        <a href="https://booksy.com/pl-pl/126242_klinika-sosnowa-rehabilitacja-i-fizjoterapia_fizjoterapia_3_warszawa/staffer/718317" target="_blank" rel="noopener noreferrer" class="btn btn-ghost">Rezerwuj w Booksy</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- PASEK WSPÓŁPRACY -->
+  <div class="collab">
+    <div class="collab-track">
+      <span>Pracuję z zawodnikami</span><span>KS Markowi Biegacze</span><span>MKS Sparta Marki</span><span>Reprezentanci kadry narodowej</span>
+      <span>Pracuję z zawodnikami</span><span>KS Markowi Biegacze</span><span>MKS Sparta Marki</span><span>Reprezentanci kadry narodowej</span>
+    </div>
+  </div>
+
+  <!-- DLA KOGO -->
+  <section id="dla-kogo" class="on-white" data-stack style="--n:1;">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Dla kogo</p>
+        <h2 class="section-title" data-words>Jeśli któryś z tych punktów brzmi znajomo, jesteś we właściwym miejscu</h2>
+      </div>
+      <div class="who-grid">
+        <article class="who-card"><div class="who-num">01</div><h3>Przewlekły ból pleców i szyi</h3><p>Odpuszcza na kilka dni po masażu albo tabletce, po czym odzywa się dokładnie tak samo. Wraca, bo nie ruszyliśmy przyczyny.</p></article>
+        <article class="who-card"><div class="who-num">02</div><h3>Dyskopatia i promieniowanie</h3><p>Ból schodzący do ręki lub nogi, drętwienie, mrowienie. Trzeba to zbadać i rozpisać plan na kilka tygodni.</p></article>
+        <article class="who-card"><div class="who-num">03</div><h3>Uraz sportowy</h3><p>Chcesz wrócić do treningu i mieć pewność, że staw wytrzyma obciążenie. Samo ustąpienie bólu ci nie wystarczy.</p></article>
+        <article class="who-card"><div class="who-num">04</div><h3>Po operacji lub kontuzji</h3><p>Zdjęto gips, skończył się szpitalny protokół i zostajesz sam z pytaniem, co dalej i jak szybko można obciążać.</p></article>
+        <article class="who-card"><div class="who-num">05</div><h3>Praca przy biurku</h3><p>Napięty kark, drętwiejące ręce, sztywność między łopatkami po ośmiu godzinach przed monitorem.</p></article>
+        <article class="who-card"><div class="who-num">06</div><h3>Wada postawy</h3><p>U ciebie albo u dziecka. Warto wiedzieć, co da się skorygować ruchem, a co wymaga konsultacji lekarskiej.</p></article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ZAKRES OPIEKI -->
+  <section id="uslugi" data-stack style="--n:2;">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Zakres opieki</p>
+        <h2 class="section-title" data-words>Cztery obszary, w których pracuję</h2>
+        <p>Każda wizyta zaczyna się od badania. To z niego wynika, jakich narzędzi użyjemy.</p>
+      </div>
+
+      <div class="svc-stack">
+      <div class="svc-row" style="--n:0;">
+        <div class="svc-num">01</div>
+        <h3>Fizjoterapia ortopedyczna</h3>
+        <div class="svc-body">
+          <p>Bóle kręgosłupa i stawów, dyskopatie, przeciążenia oraz rehabilitacja po urazach i zabiegach operacyjnych.</p>
+          <ul class="svc-list">
+            <li>Przewlekłe bóle pleców i szyi</li>
+            <li>Dyskopatia i dolegliwości promieniujące do kończyn</li>
+            <li>Terapia manualna: mobilizacje stawowe i praca na tkankach</li>
+            <li>Stopniowe przywracanie zakresu ruchu i siły</li>
+            <li>Plan ćwiczeń dopasowany do twojego dnia</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="svc-row" style="--n:1;">
+        <div class="svc-num">02</div>
+        <h3>Fizjoterapia sportowa</h3>
+        <div class="svc-body">
+          <p>Przegląd techniczny dla ciała sportowca i powrót do startów po tym, co już się wydarzyło.</p>
+          <ul class="svc-list">
+            <li>Ocena deficytów zakresu ruchu limitujących twoje możliwości sportowe</li>
+            <li>Ocena wzorców ruchu w twojej dyscyplinie</li>
+            <li>Rehabilitacja po urazach sportowych i przeciążeniowych</li>
+            <li>Przygotowanie ciała przed startem</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="svc-row" style="--n:2;">
+        <div class="svc-num">03</div>
+        <h3>Ocena i korekta wad postawy</h3>
+        <div class="svc-body">
+          <p>Sprawdzamy, co dzieje się z twoją sylwetką pod obciążeniem i co da się z tym zrobić ruchem.</p>
+          <ul class="svc-list">
+            <li>Badanie ustawienia miednicy, kręgosłupa i obręczy barkowej</li>
+            <li>Ocena, które wzorce są nawykiem, a które ograniczeniem strukturalnym</li>
+            <li>Praca nad wzorcem oddechowym i kontrolą tułowia</li>
+            <li>Zestaw ćwiczeń korekcyjnych do domu i kontrola postępów</li>
+            <li>Dla dorosłych i dla dzieci</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="svc-row" style="--n:3;">
+        <div class="svc-num">04</div>
+        <h3>Trening personalny i prowadzenie online</h3>
+        <div class="svc-body">
+          <p>Trening prowadzony przez fizjoterapeutę, który wie, co twoje tkanki faktycznie wytrzymają.</p>
+          <ul class="svc-list">
+            <li>Plan oparty na badaniu, nie na gotowym schemacie z internetu</li>
+            <li>Nauka techniki i bezpiecznego obciążania</li>
+            <li>Prowadzenie online: stały kontakt na WhatsAppie</li>
+            <li>Kontrola diety i realna weryfikacja postępów</li>
+          </ul>
+        </div>
+      </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- PRZEBIEG WIZYTY -->
+  <section id="przebieg" class="on-white" data-stack style="--n:3;">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Przebieg wizyty</p>
+        <h2 class="section-title" data-words>Wiesz, czego się spodziewać</h2>
+      </div>
+      <div class="process">
+        <div class="step"><div class="step-num">01</div><h3>Rozmowa</h3><p>Pytam o historię dolegliwości, twoją aktywność, pracę i to, co już próbowałeś. Bez tego badanie jest tylko zgadywaniem.</p></div>
+        <div class="step"><div class="step-num">02</div><h3>Badanie</h3><p>Oglądam, jak się poruszasz, i testuję konkretne struktury. Na koniec wiesz, co jest źródłem problemu i dlaczego akurat to.</p></div>
+        <div class="step"><div class="step-num">03</div><h3>Terapia</h3><p>Praca manualna, ruch albo jedno i drugie, zależnie od tego, co wyszło z badania. Sprawdzamy efekt jeszcze na miejscu.</p></div>
+        <div class="step"><div class="step-num">04</div><h3>Plan</h3><p>Wychodzisz z zestawem ćwiczeń i jasną informacją, co robić, czego unikać i kiedy widzimy się ponownie.</p></div>
+      </div>
+      <p class="process-note">Pierwsza wizyta trwa dłużej niż kolejne. Większość tego czasu zajmuje badanie i rozmowa.</p>
+    </div>
+  </section>
+
+  <!-- O MNIE -->
+  <section id="o-mnie" data-stack style="--n:4;">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">O mnie</p>
+        <h2 class="section-title" data-words>Mikołaj Letkiewicz</h2>
+      </div>
+      <div class="about">
+        <div>
+          <p>Jestem dyplomowanym fizjoterapeutą z doświadczeniem zdobytym zarówno w Polsce, jak i w Kanadzie. Specjalizuję się w terapii ortopedycznej i sportowej, wspierając zarówno osoby zmagające się z bólem czy kontuzjami, jak i tych, którzy chcą zadbać o profilaktykę i sprawność swojego ciała.</p>
+          <p>Pracuję jeden na jeden i nie prowadzę dwóch osób naraz. Wizyta to rozmowa, badanie i terapia, a nie sam zabieg. Chcę, żebyś wychodził wiedząc, co się dzieje z twoim ciałem i co możesz z tym zrobić sam.</p>
+        </div>
+        <aside class="about-side">
+          <h3>Wizyty domowe</h3>
+          <p>Dojeżdżam do pacjenta, jeśli dotarcie do gabinetu jest utrudnione: po zabiegu, przy ograniczonej samodzielności albo w opiece nad bliskim.</p>
+          <div class="row"><span class="k">Gabinet główny</span><span class="v">Marki</span></div>
+          <div class="row"><span class="k">Druga lokalizacja</span><span class="v">Warszawa Wesoła</span></div>
+          <div class="row"><span class="k">Instagram</span><span class="v"><a href="https://www.instagram.com/_letfit_/" target="_blank" rel="noopener noreferrer">@_letfit_</a></span></div>
+        </aside>
+      </div>
+    </div>
+  </section>
+
+  <!-- CENNIK -->
+  <section id="cennik" class="on-white" data-stack style="--n:5;">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Cennik</p>
+        <h2 class="section-title" data-words>Przejrzyste stawki, bez gwiazdek</h2>
+        <p>Wszystkie ceny dotyczą jednej wizyty, chyba że zaznaczono inaczej.</p>
+      </div>
+
+      <div class="price-group">
+        <h3>Fizjoterapia</h3>
+        <details class="price-item"><summary><span><span class="price-name">Pierwsza wizyta fizjoterapeutyczna</span><span class="price-dur">1 godz.</span></span><span class="price-val">220 zł</span></summary><p>Wywiad, badanie i pierwsza terapia w jednym spotkaniu. Wychodzisz wiedząc, skąd bierze się problem, co robimy dalej i co masz ćwiczyć między wizytami.</p></details>
+        <details class="price-item"><summary><span><span class="price-name">Kolejna wizyta fizjoterapeutyczna</span><span class="price-dur">40–60 min</span></span><span class="price-val">200 zł</span></summary><p>Sprawdzamy, co zmieniło się od poprzedniego razu, i pracujemy dalej: terapia manualna połączona z pracą ruchem, z korektą planu domowego.</p></details>
+        <details class="price-item"><summary><span><span class="price-name">Wizyta domowa</span><span class="price-dur">40–60 min</span></span><span class="price-val">200 zł + dojazd</span></summary><p>To samo co w gabinecie, tylko u ciebie: dla osób po zabiegu, z ograniczoną samodzielnością albo w opiece nad bliskim. Na terenie Marek dojazd jest w cenie.</p></details>
+      </div>
+
+      <div class="price-group">
+        <h3>Postawa</h3>
+        <details class="price-item"><summary><span><span class="price-name">Ocena postawy</span><span class="price-dur">30 min</span></span><span class="price-val">150 zł</span></summary><p>Badanie ustawienia miednicy, kręgosłupa i obręczy barkowej. Kończy się konkretną informacją: co da się skorygować ruchem, a co wymaga konsultacji lekarskiej. Dla dorosłych i dla dzieci.</p></details>
+      </div>
+
+      <div class="price-group">
+        <h3>Trening</h3>
+        <details class="price-item"><summary><span><span class="price-name">Trening personalny</span><span class="price-dur">1 godz.</span></span><span class="price-val">200 zł</span></summary><p>Trening prowadzony przez fizjoterapeutę, a nie przez trenera: plan oparty na badaniu, nauka techniki i bezpiecznego obciążania.</p></details>
+        <details class="price-item"><summary><span><span class="price-name">Prowadzenie online</span><span class="price-dur">miesięcznie</span></span><span class="price-val">200 zł</span></summary><p>Plan ćwiczeń i stały kontakt na WhatsAppie przez cały miesiąc, z realną weryfikacją postępów. Nie musisz mieszkać w Markach.</p></details>
+      </div>
+
+      <p class="price-foot">Przy wizycie domowej na terenie Marek dojazd jest w cenie. Poza Markami do stawki doliczany jest dojazd, ustalany indywidualnie.</p>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section id="faq" data-stack style="--n:6;">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Pytania</p>
+        <h2 class="section-title" data-words>Zanim przyjdziesz</h2>
+      </div>
+      <div class="faq-list">
+        <details class="faq-item"><summary>Czy potrzebuję skierowania od lekarza?</summary><p>Nie. Na wizytę prywatną możesz umówić się bezpośrednio, bez skierowania.</p></details>
+        <details class="faq-item"><summary>Gdzie przyjmujesz?</summary><p>W dwóch miejscach: w gabinecie w Markach przy ul. Kościuszki 59 oraz w Klinice Sosnowej w Warszawie Wesołej przy Jeździeckiej 21F. Dojeżdżam też do pacjenta do domu, jeśli dotarcie do gabinetu jest utrudnione. Zwróć uwagę, której lokalizacji dotyczy rezerwowany termin. Marki umawiam przez kalendarz na tej stronie, a Wesołą przez Booksy.</p></details>
+        <details class="faq-item"><summary>Ile wizyt będę potrzebować?</summary><p>Nikt nie jest w stanie przewidzieć, ile potrzebnych będzie spotkań. Można bazować na tym, ile to trwało u osób z podobnym problemem, ale trzeba pamiętać, że każdy organizm jest inny. Dużo do powiedzenia mają też czynniki niezależne od fizjoterapeuty: styl życia, dieta, praca pacjenta i higiena snu.</p></details>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <div class="cta-band" data-stack style="--n:7;">
+    <div class="wrap">
+      <h2 data-words>Zacznijmy od badania, nie od zgadywania.</h2>
+      <p>Umów pierwszą wizytę i dowiedz się, skąd faktycznie bierze się problem.</p>
+      <div class="cta-actions">
+        <a href="#kontakt" class="btn">Umów wizytę w Markach</a>
+        <a href="https://booksy.com/pl-pl/126242_klinika-sosnowa-rehabilitacja-i-fizjoterapia_fizjoterapia_3_warszawa/staffer/718317" target="_blank" rel="noopener noreferrer" class="btn btn-ghost">Rezerwuj w Klinice Sosnowej</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- KONTAKT -->
+  <section id="kontakt" class="on-white" data-stack style="--n:8;">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Kontakt</p>
+        <h2 class="section-title" data-words>Dwie lokalizacje, dwa kanały rezerwacji</h2>
+        <p>Zwróć uwagę, której lokalizacji dotyczy rezerwowany termin.</p>
+      </div>
+
+      <div class="loc-grid">
+        <article class="loc-card">
+          <div class="loc-badge">Gabinet główny</div>
+          <h3>Marki</h3>
+          <p class="loc-addr">ul. Kościuszki 59, 05-270 Marki</p>
+          <p class="loc-hint">Przyjmuję po wcześniejszym umówieniu terminu.</p>
+          <p class="loc-hours">Poniedziałek – piątek: <span class="todo">[UZUPEŁNIJ: godziny]</span></p>
+          <div class="loc-actions">
+            <a href="https://www.google.com/maps/search/?api=1&query=Ko%C5%9Bciuszki+59+05-270+Marki" target="_blank" rel="noopener noreferrer" class="btn btn-ghost">Pokaż na mapie</a>
+          </div>
+        </article>
+        <article class="loc-card">
+          <div class="loc-badge">Warszawa Wesoła</div>
+          <h3>Klinika Sosnowa</h3>
+          <p class="loc-addr">Jeździecka 21F, lok. 5, 05-077 Warszawa</p>
+          <p class="loc-hint">Wizyty wyłącznie po rezerwacji w Booksy.</p>
+          <p class="loc-hours">Poniedziałek – niedziela: 08:00 – 20:00</p>
+          <div class="loc-actions">
+            <a href="https://booksy.com/pl-pl/126242_klinika-sosnowa-rehabilitacja-i-fizjoterapia_fizjoterapia_3_warszawa/staffer/718317" target="_blank" rel="noopener noreferrer" class="btn">Rezerwuj w Booksy</a>
+            <a href="https://www.google.com/maps/search/?api=1&query=Je%C5%BAdziecka+21F+05-077+Warszawa+Weso%C5%82a" target="_blank" rel="noopener noreferrer" class="btn btn-ghost">Mapa</a>
+          </div>
+        </article>
+      </div>
+
+      <div class="contact-rows">
+        <div class="row"><span class="k">Telefon</span><span class="v"><span class="todo">[UZUPEŁNIJ: numer telefonu]</span></span></div>
+        <div class="row"><span class="k">E-mail</span><span class="v"><span class="todo">[UZUPEŁNIJ: adres e-mail]</span></span></div>
+        <div class="row"><span class="k">Instagram</span><span class="v"><a href="https://www.instagram.com/_letfit_/" target="_blank" rel="noopener noreferrer">@_letfit_</a></span></div>
+        <div class="row"><span class="k">Wizyty domowe</span><span class="v">Marki i okolice</span></div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="wrap footer-inner">
+    <img src="/brand/letfit-horizontal.png" alt="LetFit Physio">
+    <div class="footer-links">
+      <a href="#uslugi">Zakres opieki</a>
+      <a href="#cennik">Cennik</a>
+      <a href="#kontakt">Kontakt</a>
+      <a href="/polityka-prywatnosci">Polityka prywatności</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+(function () {
+  var REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ----------------------------------------------------------------
+     1. ROZBICIE NAGŁÓWKÓW NA SŁOWA
+
+     Każde słowo dostaje maskę `.word` i nośnik `<i>`. Numer `--i` jest
+     ciągły w obrębie nagłówka, więc opóźnienia narastają równo — także
+     wtedy, gdy w nagłówku siedzi już gotowy element (rotujący fragment
+     w hero ma swoje `--i` wpisane w HTML-u).
+     ---------------------------------------------------------------- */
+  function splitWords(host, startIndex) {
+    var i = startIndex || 0;
+    var targets = host.hasAttribute('data-words') ? [host] : host.querySelectorAll('[data-words]');
+
+    Array.prototype.forEach.call(targets, function (node) {
+      var words = node.textContent.trim().split(/\s+/);
+      node.textContent = '';
+      words.forEach(function (w, k) {
+        var span = document.createElement('span');
+        span.className = 'word';
+        span.style.setProperty('--i', i++);
+        var inner = document.createElement('i');
+        inner.textContent = w;
+        span.appendChild(inner);
+        node.appendChild(span);
+        if (k < words.length - 1) node.appendChild(document.createTextNode(' '));
+      });
+    });
+    return i;
+  }
+
+  /* ----------------------------------------------------------------
+     1b. PRZYCISKI — otoczka i przewijana etykieta
+
+     Do każdego przycisku dokładamy warstwę tła (`.btn__bg`, cała robota
+     otoczki siedzi w jej pseudoelementach) i przepisujemy tekst na słowa
+     z kopią pod spodem. Ikony SVG zostają nietknięte — przechodzimy
+     wyłącznie po węzłach tekstowych.
+
+     Kopia dostaje aria-hidden, żeby czytnik ekranu nie przeczytał etykiety
+     dwa razy.
+     ---------------------------------------------------------------- */
+  Array.prototype.forEach.call(document.querySelectorAll('.btn'), function (btn) {
+    if (btn.querySelector('.btn__bg')) return;
+
+    var bg = document.createElement('span');
+    bg.className = 'btn__bg';
+    bg.setAttribute('aria-hidden', 'true');
+
+    /*
+      Nazwę dostępną ustawiamy jawnie, ZANIM rozbijemy tekst na słowa.
+      Po rozbiciu odstępy między słowami robi `gap` w CSS, a nie znaki
+      spacji, więc wyliczona z treści nazwa skleiłaby się w „Umówwizytę".
+    */
+    var plain = btn.textContent.replace(/\s+/g, ' ').trim();
+    if (plain && !btn.hasAttribute('aria-label')) btn.setAttribute('aria-label', plain);
+
+    var label = document.createElement('span');
+    label.className = 'btn__label';
+    var wordIndex = 0;
+
+    // Zbieramy dzieci PRZED przenoszeniem — kolekcja jest żywa.
+    Array.prototype.slice.call(btn.childNodes).forEach(function (node) {
+      if (node.nodeType === 3) {
+        var text = node.textContent.trim();
+        if (!text) return;
+        text.split(/\s+/).forEach(function (w) {
+          var word = document.createElement('span');
+          word.className = 'word';
+          word.style.setProperty('--i', wordIndex++);
+
+          var front = document.createElement('i');
+          front.textContent = w;
+          var back = document.createElement('b');
+          back.textContent = w;
+          back.setAttribute('aria-hidden', 'true');
+
+          word.appendChild(front);
+          word.appendChild(back);
+          label.appendChild(word);
+        });
+        node.remove();
+      }
+    });
+
+    btn.insertBefore(bg, btn.firstChild);
+    if (label.childNodes.length) btn.appendChild(label);
+  });
+
+  /* ----------------------------------------------------------------
+     2. HERO — sekwencja startowa
+
+     Kolejność jest celowa i wyliczona, a nie dobrana na oko:
+       0 ms    tło z biegaczem zaczyna wchodzić (1400 ms, opóźnienie 240 ms)
+       ~0 ms   pierwsze słowo nagłówka
+       +70 ms  każde kolejne słowo
+       ~1100ms znak wodny, przyciski
+       HERO_END rusza rotacja drugiego fragmentu
+
+     Rotacja NIE MOŻE startować w trakcie rewealu — dwa ruchy w tej samej
+     linii czytają się jak usterka. Dlatego pierwszy obrót wypada dopiero
+     po zakończeniu wjazdu ostatniego słowa, z dodatkowym oddechem.
+     ---------------------------------------------------------------- */
+  var hero = document.querySelector('[data-hero-reveal]');
+  var heroWordCount = 0;
+
+  if (hero) {
+    heroWordCount = splitWords(hero, 0);
+    // Rotujący fragment ma --i wpisane na sztywno; utrzymujemy licznik za nim.
+    heroWordCount = Math.max(heroWordCount, 4);
+
+    if (!REDUCED) {
+      hero.setAttribute('data-reveal', 'pending');
+
+      var heroShown = false;
+      var showHero = function (instant) {
+        if (heroShown) return;
+        heroShown = true;
+        hero.setAttribute('data-reveal', instant ? 'instant' : 'in');
+      };
+
+      // Ścieżka normalna: dwie klatki, żeby przeglądarka wzięła stan początkowy.
+      requestAnimationFrame(function () { requestAnimationFrame(function () { showHero(false); }); });
+
+      /*
+        Bezpiecznik. W karcie otwartej w tle i pod botem do zrzutów rAF nigdy
+        nie odpala, a nagłówek schowany pod maską zostałby pusty. setTimeout
+        w takiej karcie jest tylko spowalniany, więc dowozi odsłonięcie —
+        od razu w pozycji docelowej, bo przejście też stoi.
+      */
+      setTimeout(function () { showHero(true); }, 600);
+    }
+  }
+
+  /* ----------------------------------------------------------------
+     3. SEKCJE — reveal przy wejściu w kadr
+
+     Ten sam mechanizm co w hero, tylko wyzwalany scrollem. Numeracja
+     `--i` startuje od zera w każdym nagłówku, więc opóźnienia nie rosną
+     w nieskończoność w dole strony.
+     ---------------------------------------------------------------- */
+  var sections = [];
+  Array.prototype.forEach.call(document.querySelectorAll('[data-words]'), function (node) {
+    if (hero && hero.contains(node)) return;
+    splitWords(node, 0);
+    sections.push(node);
+  });
+
+  function revealAll() {
+    // Awaryjnie bez przejścia — patrz [data-reveal="instant"] w CSS.
+    sections.forEach(function (node) {
+      if (node.getAttribute('data-reveal') !== 'in') node.setAttribute('data-reveal', 'instant');
+    });
+  }
+
+  if (!REDUCED && 'IntersectionObserver' in window) {
+    /*
+      Stan ukryty dostają WYŁĄCZNIE nagłówki, które przy starcie leżą poza
+      kadrem. Nagłówek widoczny od razu nie ma czego czekać, a gdyby oś czasu
+      stanęła — zostałby pusty.
+    */
+    sections.forEach(function (node) {
+      var box = node.getBoundingClientRect();
+      if (box.top < window.innerHeight * 0.9) node.setAttribute('data-reveal', 'in');
+      else node.setAttribute('data-reveal', 'pending');
+    });
+
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (!e.isIntersecting) return;
+        e.target.setAttribute('data-reveal', 'in');
+        io.unobserve(e.target);
+      });
+    }, { threshold: 0.15, rootMargin: '0px 0px -8% 0px' });
+
+    sections.forEach(function (node) { io.observe(node); });
+
+    /*
+      Bezpiecznik: gdyby obserwator nigdy nie zdążył zadziałać (karta w tle,
+      bot do zrzutów), po chwili odsłaniamy wszystko. Lepszy nagłówek bez
+      animacji niż pusta sekcja.
+    */
+    setTimeout(revealAll, 4000);
+    document.addEventListener('visibilitychange', function () {
+      if (!document.hidden) setTimeout(revealAll, 2000);
+    });
+  } else {
+    // Bez IntersectionObserver albo przy prośbie o mniej ruchu treść stoi widoczna.
+    revealAll();
+  }
+
+  /* ----------------------------------------------------------------
+     3b. WYGASZANIE SEKCJI POD SPODEM
+
+     Dla każdej sekcji patrzymy, jak wysoko podjechała NASTĘPNA. Gdy jej górna
+     krawędź jest przy dolnej krawędzi okna, postęp wynosi 0; gdy dojdzie do
+     samej góry — 1. Z tego liczymy krycie, oddalenie i przesunięcie.
+
+     Rzecz jest wyliczana z położenia, nie odtwarzana w czasie, więc scroll
+     w drugą stronę cofa ją sam z siebie: te same wartości wejściowe dają te
+     same wartości wyjściowe. Nie ma stanu do „przewinięcia wstecz".
+
+     `transition` celowo NIE MA — każda klatka jest wynikiem bieżącej pozycji.
+     Dołożone przejście gubiłoby się przy szybkim przewijaniu i ciągnęło za
+     scrollem.
+     ---------------------------------------------------------------- */
+  var stacked = Array.prototype.slice.call(document.querySelectorAll('[data-stack]'));
+
+  function clamp01(v) { return v < 0 ? 0 : v > 1 ? 1 : v; }
+
+  /*
+    Pomiar geometrii — raz na układ, nie na każdą klatkę przewijania.
+
+    Mierzymy przy CHWILOWO wyłączonym przyklejaniu i wyzerowanych
+    transformacjach. Bez tego odczyt sekcji zależałby od tego, jak bardzo
+    zmniejszona jest jej sąsiadka: skalowanie przesuwa prostokąt elementu,
+    więc postęp jednej sekcji wpływałby na postęp drugiej. To sprzężenie
+    zwrotne łamało odwracalność — te same pozycje przewijania dawały inne
+    wyniki w dół i w górę (zmierzone: 5 rozbieżności na 13 punktów).
+
+    Po zapamiętaniu czystych liczb `updateStack` liczy już wyłącznie
+    z pozycji przewijania, więc wynik jest funkcją samego `scrollY`.
+  */
+  var metrics = [];
+
+  function layoutStack() {
+    var vh = window.innerHeight;
+    /*
+      Przy zerowej albo absurdalnie małej wysokości okna (okno w trakcie zmiany
+      rozmiaru, ukryta ramka) punkty przyklejenia wyszłyby głęboko ujemne
+      i rozsypały układ. Lepiej zostawić poprzedni, sensowny pomiar.
+    */
+    if (!vh || vh < 200) return;
+
+    var prev = stacked.map(function (s) {
+      return { pos: s.style.position, tr: s.style.transform };
+    });
+
+    stacked.forEach(function (s) {
+      s.style.position = 'static';
+      s.style.transform = 'none';
+    });
+
+    var y = window.scrollY;
+    metrics = stacked.map(function (s) {
+      var r = s.getBoundingClientRect();
+      return { docTop: r.top + y, h: r.height };
+    });
+
+    stacked.forEach(function (s, i) {
+      s.style.position = prev[i].pos;
+      s.style.transform = prev[i].tr;
+      var h = metrics[i].h;
+      metrics[i].stickyTop = h > vh ? Math.round(vh - h) : 0;
+      s.style.setProperty('--top', metrics[i].stickyTop + 'px');
+    });
+  }
+
+  function updateStack() {
+    var vh = window.innerHeight;
+    if (!metrics.length || !vh || vh < 200) return;
+    var y = window.scrollY;
+
+    for (var i = 0; i < stacked.length; i++) {
+      var section = stacked[i];
+
+      // Ostatnia sekcja nie ma nic nad sobą — zostaje nietknięta.
+      if (i + 1 >= stacked.length) {
+        section.style.setProperty('--fade', '1');
+        section.style.setProperty('--sc', '1');
+        section.style.setProperty('--ty', '0px');
+        continue;
+      }
+
+      /*
+        Gdzie NAPRAWDĘ jest górna krawędź następnej sekcji: w normalnym
+        przepływie byłaby na `docTop - y`, ale przyklejanie nie pozwala jej
+        wjechać wyżej niż jej własny `stickyTop`. Liczone z zapamiętanych
+        wymiarów, więc nie zależy od skalowania sąsiadów.
+      */
+      var m = metrics[i + 1];
+      var visualTop = Math.max(m.docTop - y, m.stickyTop);
+      var p = clamp01(1 - visualTop / vh);
+
+      section.style.setProperty('--fade', (1 - p * 0.82).toFixed(3));
+      section.style.setProperty('--sc', (1 - p * 0.05).toFixed(4));
+      section.style.setProperty('--ty', (-p * 26).toFixed(1) + 'px');
+    }
+  }
+
+  if (!REDUCED && stacked.length > 1) {
+    layoutStack();
+    updateStack();
+    // Bez rAF: w karcie bez kompozycji klatek i tak by nie odpalił, a licznik
+    // jest tani — kilka odczytów geometrii na zdarzenie.
+    window.addEventListener('scroll', updateStack, { passive: true });
+    window.addEventListener('resize', function () {
+      layoutStack();
+      updateStack();
+    }, { passive: true });
+    // Wysokości sekcji zmieniają się po dojściu obrazów i kroju pisma.
+    window.addEventListener('load', function () {
+      layoutStack();
+      updateStack();
+    });
+    if (document.fonts && document.fonts.ready) {
+      document.fonts.ready.then(function () {
+        layoutStack();
+        updateStack();
+      });
+    }
+  }
+
+  /* ----------------------------------------------------------------
+     4. ROTACJA DRUGIEGO FRAGMENTU NAGŁÓWKA
+
+     Logika przeniesiona z hero-rotating-line.tsx: losujemy spośród
+     POZOSTAŁYCH pozycji, więc ten sam wariant nigdy nie wypada dwa razy
+     z rzędu i nie ma pętli losowania.
+     ---------------------------------------------------------------- */
+  var line = document.getElementById('swapLine');
+  var phrases = [
+    'którego ci brakuje', 'w pełnej skali', 'bez ograniczeń', 'bez asekuracji',
+    'który cię nie boli', 'bez bólu rano', 'wróć do siebie', 'wróć do zdrowia',
+    'wróć do formy', 'bądź znów sobą', 'który cię napędza', 'który cię niesie',
+    'który daje radość'
+  ];
+
+  if (line && phrases.length > 1 && !REDUCED) {
+    // Koniec rewealu hero + oddech, żeby ruchy się nie nakładały.
+    var step = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--word-step')) || 70;
+    var dur = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--word-dur')) || 700;
+    var heroEnd = heroWordCount * step + dur + 400;
+
+    var index = 0;
+    setTimeout(function () {
+      setInterval(function () {
+        /*
+          W karcie w tle nie podmieniamy nic. Animacja wejścia stałaby tam
+          na klatce zerowej (opacity 0) i fragment zniknąłby z nagłówka aż
+          do powrotu na wierzch — a bot do zrzutów złapałby lukę w zdaniu.
+        */
+        if (document.hidden) return;
+
+        var draw = Math.floor(Math.random() * (phrases.length - 1));
+        index = draw >= index ? draw + 1 : draw;
+
+        // Klon wymusza ponowne odpalenie klatek animacji wejścia.
+        var next = line.cloneNode(false);
+        next.className = 'swap-live is-swapping';
+        next.textContent = phrases[index];
+        line.parentNode.replaceChild(next, line);
+        line = next;
+      }, 2600);
+    }, heroEnd);
+  }
+})();
+</script>
+
+</body>
+</html>

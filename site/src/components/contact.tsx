@@ -1,4 +1,4 @@
-import { booking, business, contact, telLink, waLink } from "@/content/site";
+import { booking, business, contact, isTodo, telLink, waLink } from "@/content/site";
 import type { Location } from "@/content/site";
 import { AuthorCard } from "./author-card";
 import {
@@ -91,7 +91,19 @@ export function Contact() {
               </Row>
 
               <Row icon={<MailIcon className="size-5" />} label="E-mail">
-                <Val>{business.email}</Val>
+                {/* Adres jest klikalny tak samo jak telefon — dopóki jest
+                    prawdziwy. Znacznik [UZUPEŁNIJ] nie może zostać odnośnikiem,
+                    bo `mailto:` z placeholderem otwiera pustą wiadomość. */}
+                {isTodo(business.email) ? (
+                  <Val>{business.email}</Val>
+                ) : (
+                  <a
+                    href={`mailto:${business.email}`}
+                    className="break-all hover:text-blue-bright"
+                  >
+                    {business.email}
+                  </a>
+                )}
               </Row>
 
               <Row

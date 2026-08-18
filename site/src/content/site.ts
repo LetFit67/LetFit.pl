@@ -7,10 +7,11 @@
  * podmień je na prawdziwe wartości. Dopóki tego nie zrobisz, na stronie
  * wyświetli się widoczny znacznik [UZUPEŁNIJ], żebyś nie wypuścił jej z lukami.
  *
- * UWAGA — konflikt źródeł: opisy usług, adres i zakres wizyt pochodzą
- * bezpośrednio od Mikołaja i mają pierwszeństwo. Profil Booksy prowadzony przy
- * Klinice Sosnowej (Warszawa Wesoła) mówi co innego niż podany adres w Markach.
- * Ceny oznaczone komentarzem „z Booksy" wymagają potwierdzenia.
+ * Wszystkie treści pochodzą bezpośrednio od Mikołaja.
+ *
+ * W sierpniu 2026 ze strony zniknęły: lokalizacja w Klinice Sosnowej
+ * (Warszawa Wesoła) i rezerwacja przez Booksy. Zostaje gabinet w Markach
+ * oraz wizyty domowe, a terminy idą wyłącznie przez formularz zgłoszenia.
  */
 
 export const TODO = (co: string) => `[UZUPEŁNIJ: ${co}]`;
@@ -56,15 +57,19 @@ export const business: {
   person: "Mikołaj Letkiewicz",
   role: "Fizjoterapeuta",
 
-  phoneDisplay: TODO("numer telefonu"),
+  phoneDisplay: "794 420 328",
   /** Format E.164 — zasila linki tel: i WhatsApp. */
-  phoneE164: "", // np. "+48123456789"
+  phoneE164: "+48794420328",
 
-  email: TODO("adres e-mail"),
+  email: "mikolaj.letkiewicz@gmail.com",
 
-  /** Rezerwacja wizyt w Klinice Sosnowej (Warszawa Wesoła). */
-  booksyUrl:
-    "https://booksy.com/pl-pl/126242_klinika-sosnowa-rehabilitacja-i-fizjoterapia_fizjoterapia_3_warszawa/staffer/718317",
+  /**
+   * PUSTE ŚWIADOMIE — Booksy zostało wycofane ze strony (decyzja Mikołaja,
+   * sierpień 2026) razem z lokalizacją w Klinice Sosnowej. Wszystkie przyciski
+   * i odnośniki do Booksy są warunkowe, więc puste pole wystarcza, żeby zniknęły
+   * z nagłówka, hero, rezerwacji i kontaktu. Wpisanie tu adresu przywróci je.
+   */
+  booksyUrl: "",
 
   social: {
     instagram: "https://www.instagram.com/_letfit_/",
@@ -85,7 +90,7 @@ export const business: {
       city: "Marki",
       postalCode: "05-270", // ogólny kod dla Marek — warto zweryfikować
       hint: "Przyjmuję po wcześniejszym umówieniu terminu.",
-      hours: [{ day: "Poniedziałek – piątek", value: TODO("godziny") }],
+      hours: [{ day: "Poniedziałek – sobota", value: "08:00 – 20:00" }],
       mapsUrl:
         "https://www.google.com/maps/search/?api=1&query=Ko%C5%9Bciuszki+59+05-270+Marki",
       /**
@@ -98,21 +103,11 @@ export const business: {
       bookingUrl: "",
       bookingLabel: "",
     },
-    {
-      name: "Klinika Sosnowa",
-      badge: "Warszawa Wesoła",
-      street: "Jeździecka 21F, lok. 5",
-      city: "Warszawa",
-      postalCode: "05-077",
-      hint: "Wizyty wyłącznie po rezerwacji w Booksy.",
-      hours: [{ day: "Poniedziałek – niedziela", value: "08:00 – 20:00" }],
-      mapsUrl:
-        "https://www.google.com/maps/search/?api=1&query=Je%C5%BAdziecka+21F+05-077+Warszawa+Weso%C5%82a",
-      mapsEmbedUrl: "",
-      bookingUrl:
-        "https://booksy.com/pl-pl/126242_klinika-sosnowa-rehabilitacja-i-fizjoterapia_fizjoterapia_3_warszawa/staffer/718317",
-      bookingLabel: "Rezerwuj w Booksy",
-    },
+    /*
+      Klinika Sosnowa (Warszawa Wesoła) została usunięta w sierpniu 2026 —
+      decyzja Mikołaja. Razem z nią zniknął jedyny kanał rezerwacji przez
+      Booksy. Zostaje gabinet w Markach i wizyty domowe.
+    */
   ],
 
   /** Wizyty domowe — drugie miejsce, w którym Mikołaj przyjmuje. */
@@ -124,8 +119,8 @@ export const business: {
   },
 
   legal: {
-    companyName: TODO("pełna nazwa działalności"),
-    nip: TODO("NIP"),
+    companyName: "Mikołaj Letkiewicz LetFit Physio",
+    nip: "1251796178",
   },
 };
 
@@ -210,8 +205,7 @@ export const booking = {
     "Szczegóły w polityce prywatności.",
   /** Lokalizacja, której dotyczy formularz — żeby nie było wątpliwości. */
   locationNote:
-    "Formularz dotyczy gabinetu w Markach przy ul. Kościuszki 59 oraz wizyt domowych. " +
-    "Terminy w Klinice Sosnowej rezerwujesz przez Booksy.",
+    "Formularz dotyczy gabinetu w Markach przy ul. Kościuszki 59 oraz wizyt domowych.",
   /**
    * Przycisk obok notki powyżej. Sama notka odsyłała pacjenta do Booksy
    * słownie, ale nie było w co kliknąć — najbliższy odnośnik leżał dopiero
@@ -220,18 +214,18 @@ export const booking = {
    * Puste = przycisk się nie renderuje. Znika też sam, gdy `business.booksyUrl`
    * jest pusty.
    */
-  booksyLabel: "Rezerwuj w Klinice Sosnowej",
+  /* Puste — nie ma już dokąd odsyłać po wycofaniu Booksy. */
+  booksyLabel: "",
 
   /**
    * Grafik, z którego kalendarzyk buduje dostępne dni i godziny.
    *
-   * DO POTWIERDZENIA PRZEZ MIKOŁAJA — godziny 8:00–20:00 są przepisane
-   * z Kliniki Sosnowej i są tylko punktem wyjścia. To samo dotyczy tego,
-   * czy naprawdę nie przyjmuje w soboty.
+   * Soboty są przyjmowane (decyzja Mikołaja, sierpień 2026).
+   * GODZINY 8:00–20:00 NADAL DO POTWIERDZENIA — to punkt wyjścia, nie ustalenie.
    */
   schedule: {
-    /** Dni robocze wg `Date.getDay()`: 1 = poniedziałek … 5 = piątek. */
-    workdays: [1, 2, 3, 4, 5],
+    /** Dni pracy wg `Date.getDay()`: 1 = poniedziałek … 6 = sobota. */
+    workdays: [1, 2, 3, 4, 5, 6],
     /** Pierwsza i ostatnia godzina, na którą można się zapisać. */
     from: "08:00",
     to: "20:00",
@@ -464,12 +458,94 @@ export const services = {
 };
 
 /* ------------------------------------------------------------------ */
+/* SPRZĘT W GABINECIE                                                  */
+/* ------------------------------------------------------------------ */
+
+/**
+ * Wyposażenie gabinetu, podane przez Mikołaja (17.08.2026).
+ *
+ * Lista jest opisowa, nie sprzedażowa: pacjent ma zobaczyć, czym dysponuje
+ * gabinet, a nie dostać obietnicę, że każde urządzenie zostanie u niego użyte.
+ * O doborze decyduje badanie — mówi o tym zdanie w `note`.
+ *
+ * Nazwy zapisane tak, jak podał je Mikołaj. Puste `items` chowa całą sekcję.
+ */
+export const equipment = {
+  eyebrow: "Wyposażenie",
+  heading: "Sprzęt, który mam na miejscu",
+  lead:
+    "Fizykoterapia jest dodatkiem do terapii manualnej i pracy ruchem, nie zamiast nich. " +
+    "To, czy i czego użyjemy, wychodzi z badania.",
+  items: [
+    "Elektroterapia",
+    "Ultradźwięki",
+    "Pole magnetyczne",
+    "Laser wysokoenergetyczny",
+    "Fala uderzeniowa",
+    "Tecar",
+    "Diatermia",
+    "USG",
+    "Elektrostymulator mięśniowy",
+    "Aparat do elektrolizy",
+    "Aparat do stymulacji śródmięśniowej",
+  ],
+};
+
+/* ------------------------------------------------------------------ */
 /* WSPÓŁPRACA ZE SPORTOWCAMI                                           */
 /* ------------------------------------------------------------------ */
 
-export const collaborations = {
+/**
+ * Pasek przewijający się w kółko pod hero.
+ *
+ * `logo` jest OPCJONALNE i wskazuje plik w `/public/brand/clubs/`. Dopóki go nie
+ * ma, w pasku jedzie sama nazwa klubu — nic się nie psuje, a pasek nadal działa.
+ * Po wrzuceniu pliku wystarczy dopisać ścieżkę tutaj.
+ *
+ * Logotypy klubów są cudzym znakiem towarowym. Wrzucaj wyłącznie takie, na które
+ * masz zgodę — pobrane z profilu klubu „bo są publiczne" to za mało.
+ *
+ * Format: PNG lub SVG z przezroczystym tłem, wysokość co najmniej 120 px.
+ * Pasek i tak sprowadza je do skali szarości i wtapia w tło, więc kolor pliku
+ * nie ma znaczenia, ale przezroczystość ma — logo na białym prostokącie
+ * będzie widać jako łatę.
+ */
+export const collaborations: {
+  lead: string;
+  items: {
+    name: string;
+    /** Plik w `/public/brand/clubs/`. Puste = pokazujemy zastępnik z inicjałami. */
+    logo?: string;
+    /** Herby są okrągłe, znaki na kwadratowym tle lepiej wyglądają w kwadracie. */
+    shape?: "circle" | "rounded";
+    /** Zastępnik, dopóki nie ma pliku — NIE podrabiamy cudzego znaku. */
+    initials: string;
+  }[];
+} = {
   lead: "Pracuję z zawodnikami",
-  items: ["KS Markowi Biegacze", "MKS Sparta Marki", "Reprezentanci kadry narodowej"],
+  items: [
+    {
+      name: "KS Markowi Biegacze",
+      shape: "rounded",
+      initials: "MB",
+      logo: "/brand/clubs/markowi-biegacze.png",
+    },
+    {
+      name: "MKS Sparta Marki",
+      shape: "circle",
+      initials: "SM",
+      logo: "/brand/clubs/sparta-marki.jpg",
+    },
+    {
+      name: "Reprezentanci kadry narodowej",
+      shape: "circle",
+      initials: "PL",
+      /* UWAGA: plik pochodzi ze stocka i ma wtopiony znak wodny „pngtree".
+         Widać go na stronie i jest to cudzy znak — do podmiany na czystą
+         grafikę flagi, zanim strona pójdzie na produkcję. */
+      logo: "/brand/clubs/kadra-polski.png",
+    },
+  ],
 };
 
 /* ------------------------------------------------------------------ */
@@ -682,13 +758,92 @@ export const pricing = {
 /* ------------------------------------------------------------------ */
 
 /**
- * CELOWO PUSTE. Opinii nie da się wymyślić — wklej tu prawdziwe cytaty
- * (za zgodą pacjentów) albo zostaw pustą tablicę, a sekcja się nie wyświetli.
+ * PRAWDZIWE OPINIE Z WIZYTÓWKI GOOGLE, przepisane 17.08.2026.
+ *
+ * Zasady, których trzymamy się w tej sekcji:
+ * — cytujemy WYŁĄCZNIE wypowiedzi pacjentów; odpowiedzi Mikołaja pod opiniami
+ *   nie trafiają na stronę,
+ * — treść jest wierna oryginałowi. Poprawione zostały jedynie brakujące spacje
+ *   po przecinkach, bo to zapis, a nie słowa autora. Literówki i skróty
+ *   („profeska", „fizjo") zostają — cytat ma brzmieć jak cytat,
+ * — nazwiska w formie, w jakiej autorzy sami je podali w Google.
+ *
+ * `rating` zasila gwiazdki. Wszystkie dotychczasowe opinie to 5/5.
  */
 export const testimonials = {
   eyebrow: "Opinie",
   heading: "Co mówią pacjenci",
-  items: [] as { quote: string; author: string; context?: string }[],
+  /** Podpis nad listą — skąd pochodzą cytaty. */
+  source: "Opinie z wizytówki Google",
+  items: [
+    {
+      quote:
+        "Byłem już 6 raz, z różnymi dolegliwościami, przeciążenia mięśniowe i bol kolana. " +
+        "Napewno wrócę, na kolejne składanie mojego cielska w to samo miejsce :D " +
+        "Profesjonalnie, sympatycznie, nie bezboleśnie ale skutecznie! " +
+        "Ps. Dużo sprzętu jest na miejscu, więc nie ma nudy",
+      author: "Wojciech K.",
+      context: "6 miesięcy temu",
+      rating: 5,
+    },
+    {
+      quote:
+        "O panu Mikołaju dowiedziałam się od pacjentki. Jestem bardzo wdzięczna za " +
+        "profesjonalizm, dużą wiedzę, ogromne zaangażowanie, przemiłą atmosferę, " +
+        "chęć pomocy i prace domowe w formie ćwiczeń. Moje kolano doszło do świetnej " +
+        "formy. Jeszcze raz serdeczne dzięki i do miłego zobaczenia.",
+      author: "Dorota Sz.",
+      context: "2 miesiące temu",
+      rating: 5,
+    },
+    {
+      quote:
+        "Zdecydowanie polecam. Pełen profesjonalizm. Super podejście. Wiedza " +
+        "i umiejętności na najwyższym poziomie. Korzystałem z zabiegów kilka razy, " +
+        "w tym raz w „trybie ratunkowym” — Mikołaj postawił mnie na nogi, gdy zostałem " +
+        "w skłonie po nieudanej próbie podniesienia ciężaru",
+      author: "Grzegorz E.",
+      context: "7 miesięcy temu",
+      rating: 5,
+    },
+    {
+      quote:
+        "Polecam serdecznie Mikołaja. Korzystałem z dwóch innych fizjo, którzy nie byli " +
+        "w stanie pomóc, a Mikołajowi udało się! Profesjonalne podejście i rozsądny koszt. " +
+        "Polecam!",
+      author: "Hubert K.",
+      context: "8 miesięcy temu",
+      rating: 5,
+    },
+    {
+      quote:
+        "Mikołaj jest bardzo sympatycznym fizjoterapeutą, profesjonalistą i osobą, która " +
+        "słucha pacjentów. Udziela bardzo dobrych porad i wyjaśnia wszystko, co robi " +
+        "oraz dlaczego. Gorąco go polecam.",
+      author: "Lilla",
+      /* Google pokazuje tę opinię jako tłumaczenie z francuskiego — zaznaczamy to,
+         żeby nikt nie brał brzmienia zdania za oryginalne słowa autorki. */
+      context: "7 miesięcy temu · tłumaczenie z francuskiego",
+      rating: 5,
+    },
+    {
+      quote:
+        "Polecam, pełna profeska, bardzo sympatyczny i pełen zapału fizjoterapeuta, " +
+        "bardzo pomocny w leczeniu",
+      author: "Gracjan K.",
+      context: "6 miesięcy temu",
+      rating: 5,
+    },
+    {
+      quote:
+        "Polecam Mikołaja jako fizjoterapeutę z konkretnym, skutecznym podejściem. " +
+        "Szybko znalazł źródło problemu, wszystko jasno wyjaśnił i dobrał ćwiczenia, " +
+        "które faktycznie działają. Po kilku wizytach ból znacząco zmalał. Fachowa robota",
+      author: "Multi Rocka",
+      context: "8 miesięcy temu",
+      rating: 5,
+    },
+  ] as { quote: string; author: string; context?: string; rating: number }[],
 };
 
 /* ------------------------------------------------------------------ */
@@ -709,11 +864,9 @@ export const faq = {
     {
       q: "Gdzie przyjmujesz?",
       a:
-        "W dwóch miejscach: w gabinecie w Markach przy ul. Kościuszki 59 oraz " +
-        "w Klinice Sosnowej w Warszawie Wesołej przy Jeździeckiej 21F. Dojeżdżam też " +
-        "do pacjenta do domu, jeśli dotarcie do gabinetu jest utrudnione. Zwróć uwagę, " +
-        "której lokalizacji dotyczy rezerwowany termin. Marki umawiam przez kalendarz " +
-        "na tej stronie, a Wesołą przez Booksy.",
+        "W gabinecie w Markach przy ul. Kościuszki 59. Dojeżdżam też do pacjenta " +
+        "do domu, jeśli dotarcie do gabinetu jest utrudnione. Termin umówisz przez " +
+        "formularz na tej stronie.",
     },
     {
       q: "Ile wizyt będę potrzebować?",
@@ -776,6 +929,9 @@ export const contact = {
 
 export const nav = [
   { label: "Dla kogo", href: "#dla-kogo" },
+  /* Sprzęt CELOWO nie ma pozycji w menu. Po dodaniu numeru telefonu pasek
+     nawigacji był już pełny i ósma pozycja łamała go na dwa wiersze.
+     Sekcja leży tuż pod „Zakresem opieki”, więc trafia się na nią sama. */
   { label: "Zakres opieki", href: "#uslugi" },
   { label: "Wizyta", href: "#wizyta" },
   { label: "O mnie", href: "#o-mnie" },

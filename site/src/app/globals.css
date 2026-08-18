@@ -62,6 +62,23 @@
     text-wrap: balance;
   }
 
+  /*
+    HERO STOI TYPOGRAFICZNIE OSOBNO.
+
+    Nagłówek wejściowy idzie groteskiem w wadze 400 z ciasnym trackingiem —
+    krój wystawowy, duży i lekki. Reszta strony zostaje przy szeryfie,
+    więc kontrast między pierwszym ekranem a treścią jest wyraźny, a ton
+    całości pozostaje gabinetowy.
+
+    Waga 400 przy tym stopniu pisma to nie przypadek: przy 600 ten rozmiar
+    zaczyna krzyczeć, a przy 400 czyta się jak zdanie, nie jak hasło.
+  */
+  .hero-display {
+    font-family: var(--font-sans);
+    font-weight: 400;
+    letter-spacing: -0.022em;
+  }
+
   ::selection {
     background-color: var(--color-blue-soft);
     color: var(--color-ink);
@@ -123,6 +140,286 @@
   @starting-style {
     transform: scale(0.97);
   }
+}
+
+/*
+  PRZYCISKI — otoczka przetaczająca się przez pigułkę.
+
+  Wypełnienie stanu spoczynkowego leży w tle samego przycisku, a warstwa
+  najechania (`btn-fill`) rośnie nad nim. Kolory obu podaje wariant przez
+  `--btn-fill`.
+
+  TRYB COFANIA jest tu najważniejszy i celowo NIE JEST odwróceniem wejścia.
+  Gdyby warstwa po prostu wracała tą samą drogą, ruch czytałby się jak
+  przewinięta wstecz taśma. Zamiast tego przesuwa się punkt odniesienia skali:
+  przy najechaniu warstwa rośnie OD DOŁU, a po zejściu kurczy się KU GÓRZE,
+  więc wychodzi tą stroną, w którą szła. Ruch jest ciągły w jednej osi.
+
+  Skala zamiast przesunięcia, bo `scaleY` nie wymaga maskowania przycięciem
+  i nie rusza układu — animowany jest wyłącznie kompozyt.
+*/
+@utility btn-shell {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+}
+
+@utility btn-fill {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: var(--btn-fill, var(--color-ink-80));
+  transform: scaleY(0);
+  transform-origin: top;
+  /*
+    Przechodzi WYŁĄCZNIE `transform`. Punkt odniesienia skali musi przeskakiwać
+    natychmiast — to on odwraca kierunek wyjścia. Wpisany na listę przejść
+    (choćby z czasem zerowym) staje się własnością animowaną i przy zatrzymanym
+    zegarze dokumentu potrafi zostać na wartości startowej, przez co przycisk
+    wychodziłby tą samą stroną, którą wchodził.
+
+    Wyjście jest odrobinę dłuższe od wejścia — zejście z przycisku bywa
+    przypadkowe, więc łagodniejszy zanik mniej rozprasza.
+  */
+  transition: transform 520ms cubic-bezier(0.22, 0.61, 0.36, 1);
+  will-change: transform;
+}
+
+.btn-shell:hover .btn-fill,
+.btn-shell:focus-visible .btn-fill {
+  transform: scaleY(1);
+  transform-origin: bottom;
+  transition-duration: 420ms;
+}
+
+/*
+  PASEK WSPÓŁPRACY — przewijanie w kółko (components/hero.tsx).
+
+  Taśma zawiera listę DWA RAZY i jedzie o połowę własnej szerokości, więc
+  pętla domyka się bez skoku. Ruch jest liniowy i powolny: to tło informacyjne,
+  a nie element, który ma przyciągać wzrok.
+
+  Klatka 0% jest stanem spoczynkowym, więc zamrożona oś czasu (karta w tle,
+  bot do zrzutów) zostawia czytelny pasek, tylko nieruchomy.
+
+  Najechanie zatrzymuje taśmę — bez tego nie da się przeczytać dłuższej nazwy
+  ani kliknąć, gdyby kiedyś doszły odnośniki.
+*/
+/*
+  Animowana jest TAŚMA, a nie pojedyncza lista. To istotne: gdyby każda kopia
+  jechała osobno, przesuwałaby się o połowę własnej szerokości i pętla nie
+  miałaby jak się domknąć — między kopiami otwierałaby się luka.
+
+  `width: max-content` jest konieczne — bez niego pojemnik dostaje szerokość
+  rodzica, listy się kurczą i przesunięcie przestaje odpowiadać jednej kopii.
+
+  LICZBA KOPII NIE JEST OZDOBNA. Taśma przesuwa się o dokładnie jedną kopię
+  i wtedy wraca na start. Żeby w chwili powrotu nie było widać pustki, to co
+  ZOSTAJE za punktem przesunięcia musi wypełnić całą szerokość paska:
+
+      szerokość taśmy − jedna kopia  ≥  szerokość okna
+
+  Przy trzech klubach jedna kopia mierzy ok. 730 px, więc dwie kopie starczały
+  tylko do okna 730 px — na zwykłym monitorze zostawałaby luka. Ośmiu kopii
+  starczy do okna ok. 5100 px, czyli z zapasem ponad 4K.
+*/
+@utility marquee-track {
+  display: flex;
+  align-items: center;
+  width: max-content;
+  animation: marquee 38s linear infinite;
+}
+
+@keyframes marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    /* Dokładnie jedna kopia, niezależnie od tego, ile ich jest. */
+    transform: translateX(calc(-100% / var(--marquee-copies, 2)));
+  }
+}
+
+.marquee-viewport:hover .marquee-track {
+  animation-play-state: paused;
+}
+
+/*
+  Wytopienie na obu krańcach okna taśmy. Bez niego nazwy urywają się w pół
+  słowa: po lewej wjeżdżają wprost pod podpis, po prawej ucinają się na
+  krawędzi kontenera. Maska sprawia, że po prostu gasną.
+*/
+@utility marquee-fade {
+  mask-image: linear-gradient(
+    to right,
+    transparent 0,
+    #000 5rem,
+    #000 calc(100% - 4rem),
+    transparent 100%
+  );
+}
+
+/*
+  Logotypy klubów wtopione w pasek: bez koloru, przygaszone i wtopione
+  w podłoże. Chodzi o to, żeby czytały się jak znak wodny obok nazwy,
+  a nie jak galeria obcych brandów przykrywająca stronę.
+*/
+/*
+  Logotypy zostają w swoich barwach — odbarwianie zabijało je zupełnie:
+  znak Markowych Biegaczy to białe pismo na granatowym polu, a po `grayscale`
+  robił się z tego szary kwadrat bez wyrazu. `mix-blend-multiply` też odpadł,
+  bo przyciemniał ciemne tła znaczków do plamy. Zamiast tego lekkie
+  przygaszenie, żeby nie konkurowały z treścią strony.
+*/
+@utility club-logo {
+  opacity: 0.9;
+  transition: opacity 300ms ease;
+}
+
+.marquee-viewport:hover .club-logo {
+  opacity: 1;
+}
+
+/*
+  MAPA PRZEBIEGU WIZYTY (components/process-map.tsx).
+
+  Etapy są przesunięte w pionie względem siebie — dopiero od układu
+  czterokolumnowego, bo na wąskim ekranie zygzak zamieniłby się w chaos.
+*/
+.map-node {
+  margin-top: 0;
+}
+
+@media (width >= 64rem) {
+  .map-node {
+    margin-top: var(--offset, 0);
+  }
+}
+
+/*
+  Wejście etapu. Stanem BAZOWYM jest pełna widoczność — ukrycie obowiązuje
+  wyłącznie wtedy, gdy skrypt oznaczył listę jako `data-map="on"`, czyli po
+  udanym pomiarze. Bez JS-u, przy zamrożonej osi czasu i przy prośbie
+  o mniej ruchu wszystkie etapy są po prostu widoczne.
+
+  Tytuł wchodzi powoli i sam, opis dopiero po nim i wyraźnie szybciej —
+  tak, jak rozwija się notatka pod nagłówkiem.
+*/
+/*
+  Stan ukryty jest NATYCHMIASTOWY, przejście siedzi wyłącznie na stanie
+  docelowym. To nie jest kosmetyka: gdyby ukrycie też szło przejściem,
+  startowałoby od pełnej widoczności i przy zatrzymanym zegarze dokumentu
+  zostawałoby na niej na zawsze — etapy nigdy by się nie schowały, a przy
+  żywej karcie mignęłyby przed zniknięciem.
+*/
+[data-map="on"] .map-node[data-on="false"] .map-num,
+[data-map="on"] .map-node[data-on="false"] .map-title {
+  opacity: 0;
+  transform: translateY(0.7rem);
+  transition: none;
+}
+
+[data-map="on"] .map-node[data-on="false"] .map-body {
+  opacity: 0;
+  transform: translateY(0.4rem);
+  transition: none;
+}
+
+/* Tytuł wchodzi powoli i sam. */
+[data-map="on"] .map-node[data-on="true"] .map-num,
+[data-map="on"] .map-node[data-on="true"] .map-title {
+  opacity: 1;
+  transform: none;
+  transition:
+    opacity 760ms cubic-bezier(0.22, 0.61, 0.36, 1),
+    transform 760ms cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+/* Opis rozwija się po nim i wyraźnie szybciej. */
+[data-map="on"] .map-node[data-on="true"] .map-body {
+  opacity: 1;
+  transform: none;
+  transition:
+    opacity 420ms cubic-bezier(0.22, 0.61, 0.36, 1) 260ms,
+    transform 420ms cubic-bezier(0.22, 0.61, 0.36, 1) 260ms;
+}
+
+/* Kafel wyprzedzony przez strzałkę lekko podnosi obramowanie — sygnał,
+   że etap jest „zaliczony", bez zmiany układu. */
+[data-map="on"] .map-node > div {
+  transition: border-color 600ms ease;
+}
+
+[data-map="on"] .map-node[data-on="true"] > div {
+  border-color: color-mix(in srgb, var(--color-blue-bright) 34%, transparent);
+}
+
+/*
+  PAS Z OPINIAMI (components/testimonials-rail.tsx).
+
+  Pasek przewijania chowamy — pas ma własne strzałki, a na dotyku i tak
+  przewija się gestem. Zostaje `scroll-snap`, więc karta zawsze zatrzymuje
+  się na swojej krawędzi.
+*/
+.rail-track {
+  scrollbar-width: none;
+  /*
+    `auto`, mimo że dokument ma `scroll-behavior: smooth`. Pas ustawiamy
+    ręcznie w każdej klatce przeciągania i wybiegu — przy płynnym przewijaniu
+    przeglądarka dokładałaby do każdej z tych zmian własne dojeżdżanie
+    i ruch zamieniałby się w serię skoków.
+  */
+  scroll-behavior: auto;
+  overscroll-behavior-x: contain;
+}
+
+.rail-track::-webkit-scrollbar {
+  display: none;
+}
+
+/*
+  Wejście kart i gwiazdek. Stanem BAZOWYM jest pełna widoczność; stan ukryty
+  obowiązuje wyłącznie dopóki skrypt nie oznaczy pasa jako gotowego — i tylko
+  wtedy, gdy zdążył to zrobić przed pierwszym malowaniem. Bez JS-u sekcja jest
+  kompletna, a nie pusta.
+*/
+[data-rail="pending"] .rail-card {
+  opacity: 0;
+  transform: translateX(1.75rem);
+}
+
+[data-rail="in"] .rail-card {
+  opacity: 1;
+  transform: none;
+  transition:
+    opacity 620ms cubic-bezier(0.22, 0.61, 0.36, 1),
+    transform 620ms cubic-bezier(0.22, 0.61, 0.36, 1);
+  transition-delay: calc(var(--i, 0) * 90ms);
+}
+
+/*
+  Ocena „nalewa się”: kolor wypełnia każdą gwiazdkę od lewej do prawej, jedna
+  po drugiej. Zarys pod spodem jest nieruchomy, więc przez cały czas widać,
+  ile gwiazdek jeszcze zostało — a nie pustkę.
+
+  Animowany jest `clip-path`, nie krycie. Dzięki temu ruch idzie wzdłuż
+  gwiazdki, tak jak w referencyjnym klipie, zamiast być zwykłym rozjaśnieniem.
+  Stanem docelowym jest pełne wypełnienie, więc gdy zegar dokumentu stoi albo
+  użytkownik prosi o mniej ruchu, ocena po prostu jest widoczna w komplecie.
+*/
+[data-rail="pending"] .star-fill {
+  clip-path: inset(0 100% 0 0);
+}
+
+/*
+  Wypełnienie wjeżdża szybko, ale z lekkim przestrzeleniem na końcu — stąd
+  krzywa wychodząca poza zakres. Dzięki temu ocena „wskakuje” zamiast
+  spokojnie dopłynąć, a mimo to ruch zostaje krótki i nie męczy.
+*/
+[data-rail="in"] .star-fill {
+  clip-path: inset(0 0 0 0);
+  transition: clip-path 380ms cubic-bezier(0.34, 1.4, 0.64, 1);
+  transition-delay: calc(var(--i, 0) * 90ms + var(--s, 0) * 110ms + 260ms);
 }
 
 /*
@@ -433,11 +730,20 @@
   jakiś kryjący kolor, więc zatrzymana animacja nie zostawia pustego miejsca.
 */
 @utility hero-swap {
+  /*
+    Drugi wiersz jest BŁĘKITNY NA STAŁE, a połysk tylko przez niego przechodzi.
+    Wcześniej skrajne przystanki gradientu miały kolor pisma, więc wiersz
+    czytał się jak granatowy z błyskiem — a ma być czytelnym akcentem, który
+    odróżnia obietnicę od jej dopowiedzenia.
+
+    Środkowy przystanek jest jaśniejszy od bazowego, więc połysk nadal widać:
+    to rozjaśnienie w obrębie jednej barwy, nie zmiana koloru.
+  */
   background-image: linear-gradient(
     100deg,
-    var(--color-ink) 35%,
-    var(--color-blue) 50%,
-    var(--color-ink) 65%
+    var(--color-blue) 35%,
+    var(--color-blue-bright) 50%,
+    var(--color-blue) 65%
   );
   background-size: 320% 100%;
   background-position: 190% center;

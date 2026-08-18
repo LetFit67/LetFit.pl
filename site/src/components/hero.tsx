@@ -1,6 +1,6 @@
 import type { CSSProperties } from "react";
 import Image from "next/image";
-import { booking, business, collaborations, hero, telLink, waLink } from "@/content/site";
+import { booking, business, collaborations, hero, telLink } from "@/content/site";
 import { HeroRotatingLine } from "./hero-rotating-line";
 import { HeroRunnerBackdrop, HeroRunnerLayer } from "./hero-runner";
 import {
@@ -9,7 +9,6 @@ import {
   CheckIcon,
   PhoneIcon,
   Val,
-  WhatsAppIcon,
 } from "./ui";
 
 export function Hero() {
@@ -48,7 +47,15 @@ export function Hero() {
         className="hero-breathe pointer-events-none absolute top-8 right-8 hidden w-[20rem] mix-blend-multiply select-none lg:block xl:w-[24rem]"
       />
 
-      <div className="container-x relative grid items-center gap-10 lg:grid-cols-[1.02fr_0.98fr] lg:gap-16">
+      {/*
+        Kolumna z tekstem jest wyraźnie szersza niż połowa siatki. To warunek
+        konieczny dla stopnia pisma nagłówka: przy 88 px najdłuższy wariant
+        rotacji potrzebuje ok. 715 px, a przy podziale po połowie zostawało
+        555 px i wiersz łamał się na dwa. Druga kolumna jedynie rezerwuje
+        wysokość — klip z biegaczem i tak leży w warstwie tła, na 56%
+        szerokości sekcji, więc jej zwężenie go nie dotyka.
+      */}
+      <div className="container-x relative grid items-center gap-10 lg:grid-cols-[1.35fr_0.65fr] lg:gap-16">
         <div>
           <p
             style={{ "--delay": "0ms" } as CSSProperties}
@@ -61,7 +68,18 @@ export function Hero() {
           {/* Drugi wiersz podmienia się co dwie sekundy (hero-rotating-line.tsx).
               Pierwszy zostaje nieruchomy — to on niesie obietnicę, a ruch pod
               nim czyta się jak wyliczanka dopiero wtedy, gdy góra stoi. */}
-          <h1 className="text-[2.5rem] leading-[1.08] font-semibold sm:text-5xl lg:text-[3.6rem]">
+          {/*
+            Stopień pisma skaluje się płynnie zamiast skakać na progach, a jego
+            granice są ZMIERZONE, nie dobrane na oko.
+
+            Wiąże je najdłuższy wariant rotacji („którego ci brakuje"), który
+            musi zmieścić się w jednym wierszu — przy groteskowym kroju jest
+            ok. 8,1 raza szerszy niż wysoki. Górne 5,5rem (88 px) wymaga więc
+            ok. 715 px i dlatego kolumna tekstu została poszerzona do 1,35fr:
+            daje 762 px, czyli z zapasem. Dolna granica trzyma się szerokości
+            telefonu, gdzie na tekst zostaje ok. 335 px.
+          */}
+          <h1 className="hero-display text-[clamp(2.5rem,5.6vw,5.5rem)] leading-[1.04]">
             {hero.heading.split("\n").map((line, i) => {
               const rotates = i === 1 && hero.headingRotation.length > 1;
               return (
@@ -130,17 +148,9 @@ export function Hero() {
                 {business.phoneDisplay}
               </ButtonLink>
             )}
-            {waLink && (
-              <ButtonLink
-                href={waLink}
-                target="_blank"
-                rel="noopener noreferrer"
-                variant="outline"
-              >
-                <WhatsAppIcon />
-                WhatsApp
-              </ButtonLink>
-            )}
+            {/* WhatsApp CELOWO nie występuje w hero — pierwszy ekran ma dwie
+                drogi działania, nie trzy. Pozostaje w sekcji kontaktu
+                i w formularzu zgłoszenia. */}
             {!booking.enabled && !business.booksyUrl && !telLink && (
               <ButtonLink href="#kontakt">
                 <CalendarIcon />
@@ -170,35 +180,123 @@ export function Hero() {
 /* PASEK WSPÓŁPRACY ZE SPORTOWCAMI                                     */
 /* ------------------------------------------------------------------ */
 
+/**
+ * Ile razy powielamy listę klubów w taśmie. Wyprowadzenie tej liczby siedzi
+ * przy `marquee-track` w globals.css — w skrócie: taśma minus jedna kopia
+ * musi wypełnić szerokość okna, inaczej w miejscu zapętlenia widać pustkę.
+ */
+const MARQUEE_COPIES = 8;
+
 export function Collaborations() {
   if (collaborations.items.length === 0) return null;
 
   return (
-    <section className="border-b border-ink/10 bg-mist py-7">
-      {/* Podpis i trzy nazwy rozkładają się równo na całej szerokości paska.
-          Wcześniej rozciągana była sama lista, więc odstęp między podpisem
-          a pierwszym klubem był o połowę mniejszy niż odstępy między klubami
-          i rytm się sypał. `sm:contents` wypuszcza `li` bezpośrednio do flexa
-          rodzica, dzięki czemu wszystkie cztery elementy dzielą wolne miejsce
-          po równo, a znacznik listy zostaje na swoim miejscu.
-          Poniżej `sm` lista wraca do zwykłego zawijania — rozstrzelona
-          na wąskim ekranie wyglądałaby na zgubioną. */}
-      <div className="container-x flex flex-col items-start gap-x-8 gap-y-4 sm:flex-row sm:items-center sm:justify-between">
-        <p className="shrink-0 text-xs font-semibold tracking-[0.18em] text-ink-40 uppercase">
+    <section className="marquee-viewport overflow-hidden border-b border-ink/10 bg-mist py-6">
+      {/*
+        Podpis stoi nieruchomo po lewej, a taśma z klubami jedzie obok niego.
+        Na jasnym podłożu podpis musi mieć własne tło i wytopienie w prawo —
+        inaczej nazwy wjeżdżałyby wprost pod niego i zlewały się z nim.
+      */}
+      {/*
+        Taśma siedzi w tym samym kontenerze co reszta strony, a nie na całej
+        szerokości okna. To nie jest kwestia rytmu, tylko powtórzeń: na ekranie
+        2560 px rozciągnięty pasek pokazywał 2,5 kopii listy naraz i te same
+        trzy nazwy stały obok siebie. Ograniczony do kontenera mieści mniej
+        więcej jedną kopię, więc nazwa wraca dopiero po pełnym obrocie.
+      */}
+      <div className="container-x relative flex items-center">
+        <p className="relative z-10 shrink-0 bg-mist pr-6 text-xs font-semibold tracking-[0.18em] text-ink-40 uppercase">
           {collaborations.lead}
         </p>
-        <ul className="flex flex-wrap items-center gap-x-8 gap-y-2 sm:contents">
-          {collaborations.items.map((item) => (
-            <li
-              key={item}
-              className="font-display text-[15px] font-semibold text-ink-80"
-            >
-              {item}
-            </li>
-          ))}
-        </ul>
+
+        {/*
+          Pierwsza kopia niesie treść, pozostałe tylko domykają pętlę, więc są
+          schowane przed czytnikiem ekranu. Dlaczego akurat tyle kopii —
+          patrz `marquee-track` w globals.css.
+        */}
+        <div className="marquee-fade min-w-0 flex-1 overflow-hidden">
+          <div
+            className="marquee-track"
+            style={{ "--marquee-copies": MARQUEE_COPIES } as CSSProperties}
+          >
+            {Array.from({ length: MARQUEE_COPIES }, (_, i) => (
+              <ClubTape key={i} duplicate={i > 0} />
+            ))}
+          </div>
+        </div>
       </div>
     </section>
+  );
+}
+
+/**
+ * Znaczek klubu obok nazwy.
+ *
+ * Kształt bierze się z danych: herby są okrągłe, znaki złożone na kwadratowym
+ * tle wyglądają lepiej w kwadracie z zaokrąglonymi rogami. Kadr jest kwadratowy
+ * w obu przypadkach, więc rytm paska się nie sypie.
+ *
+ * Dopóki nie ma pliku, w środku siedzą inicjały — świadomie, zamiast rysować
+ * przybliżenie cudzego herbu. Po wrzuceniu grafiki do `/public/brand/clubs/`
+ * i wpisaniu ścieżki w `site.ts` zastępnik znika sam.
+ */
+function ClubBadge({
+  item,
+}: {
+  item: (typeof collaborations.items)[number];
+}) {
+  const shape = item.shape === "rounded" ? "rounded-[0.55rem]" : "rounded-full";
+  const frame = `size-9 shrink-0 overflow-hidden ${shape} ring-1 ring-ink/10`;
+
+  if (!item.logo) {
+    return (
+      <span
+        aria-hidden="true"
+        className={`${frame} grid place-items-center bg-blue-soft font-display text-[11px] font-semibold tracking-wide text-blue`}
+      >
+        {item.initials}
+      </span>
+    );
+  }
+
+  return (
+    <span aria-hidden="true" className={`${frame} bg-paper`}>
+      <Image
+        src={item.logo}
+        alt=""
+        width={144}
+        height={144}
+        className="club-logo size-full object-contain"
+        unoptimized
+      />
+    </span>
+  );
+}
+
+function ClubTape({ duplicate = false }: { duplicate?: boolean }) {
+  return (
+    /*
+      Odstępy są duże celowo. Przy ciasnym rozstawie w kadr wchodziło po kilka
+      powtórzeń tej samej nazwy naraz i pasek wyglądał na zapchany jednym
+      napisem. Szeroka przerwa sprawia, że w danej chwili widać zwykle trzy
+      pozycje, a powtórzenie wraca dopiero po przejechaniu całej listy.
+    */
+    <ul
+      className="flex shrink-0 items-center gap-x-24 pr-24 md:gap-x-32 md:pr-32"
+      aria-hidden={duplicate || undefined}
+    >
+      {collaborations.items.map((item) => (
+        <li
+          key={item.name}
+          className="flex shrink-0 items-center gap-3.5 whitespace-nowrap"
+        >
+          <ClubBadge item={item} />
+          <span className="font-display text-[15px] font-semibold text-ink-80">
+            {item.name}
+          </span>
+        </li>
+      ))}
+    </ul>
   );
 }
 

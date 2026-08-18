@@ -140,27 +140,45 @@ export function Lead({
 
 type ButtonVariant = "primary" | "accent" | "outline" | "ghost-dark";
 
+/**
+ * Pigułka zamiast prostokąta — jedyne miejsce na stronie, gdzie odchodzimy
+ * od ostrych narożników. Przycisk jest wezwaniem do działania i ma się
+ * odróżniać od kafli, które zostają kanciaste.
+ */
 const BUTTON_BASE =
-  "inline-flex items-center justify-center gap-2 rounded-btn px-6 py-3.5 text-sm font-semibold " +
-  "transition-colors duration-200";
+  "btn-shell inline-flex items-center justify-center gap-2 rounded-full px-6 py-3.5 " +
+  "text-sm font-semibold transition-colors duration-300";
 
+/**
+ * Każdy wariant podaje dwie rzeczy: wygląd spoczynkowy (tło i obramowanie
+ * na samym przycisku) oraz kolor warstwy najechania w `--btn-fill`.
+ * Samego przejścia kolorów nie animujemy — robi to warstwa `btn-fill`.
+ */
 const BUTTON_VARIANTS: Record<ButtonVariant, string> = {
-  primary: "bg-ink text-paper hover:bg-ink-80",
-  accent: "bg-blue text-paper hover:bg-blue-bright hover:text-ink",
-  outline: "border border-ink/25 text-ink hover:border-ink hover:bg-ink/[0.04]",
-  "ghost-dark": "border border-paper/30 text-paper hover:border-paper hover:bg-paper/10",
+  primary: "bg-ink text-paper [--btn-fill:var(--color-blue)]",
+  accent: "bg-blue text-paper [--btn-fill:var(--color-blue-deep)]",
+  outline:
+    "border border-ink/25 text-ink hover:border-ink hover:text-paper [--btn-fill:var(--color-ink)]",
+  "ghost-dark":
+    "border border-paper/30 text-paper hover:border-paper hover:text-ink [--btn-fill:var(--color-paper)]",
 };
 
 export function ButtonLink({
   variant = "primary",
   className = "",
+  children,
   ...props
 }: ComponentProps<"a"> & { variant?: ButtonVariant }) {
   return (
     <a
       className={`${BUTTON_BASE} ${BUTTON_VARIANTS[variant]} ${className}`}
       {...props}
-    />
+    >
+      {/* Warstwa otoczki. Dekoracyjna, leży pod treścią (z-index -1),
+          więc nie przechwytuje kliknięć ani nie wchodzi do drzewa dostępności. */}
+      <span aria-hidden="true" className="btn-fill rounded-full" />
+      {children}
+    </a>
   );
 }
 

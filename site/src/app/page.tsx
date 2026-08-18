@@ -5,6 +5,7 @@ import { Collaborations, Hero } from "@/components/hero";
 import { JsonLd } from "@/components/json-ld";
 import {
   About,
+  Equipment,
   Faq,
   ForWhom,
   Portfolio,
@@ -32,12 +33,16 @@ export default function Home() {
         <Hero />
         <Collaborations />
         <ForWhom />
+        {/* Opinie idą PRZED zakresem opieki: pacjent najpierw rozpoznaje swój
+            problem („Dla kogo”), potem widzi, że komuś takiemu jak on to
+            pomogło, i dopiero wtedy czyta, co konkretnie się robi. */}
+        <Testimonials />
         <Services />
+        <Equipment />
         <Process />
         <About />
         <Portfolio />
         <Pricing />
-        <Testimonials />
         <Faq />
         <Booking />
         <Contact />
