@@ -1,7 +1,9 @@
 "use client";
 
 import { useMemo, useState, useSyncExternalStore } from "react";
-import { booking, business, isTodo, pricing, waLink } from "@/content/site";
+import { bookingConfig, business, isTodo, telLink } from "@/content/site";
+import { useT } from "@/lib/i18n";
+import { ButtonLink, PhoneIcon } from "./ui";
 
 /**
  * Formularz zgłoszenia wizyty z podglądowym kalendarzykiem.
@@ -14,23 +16,15 @@ import { booking, business, isTodo, pricing, waLink } from "@/content/site";
  * godzin pod nim byłaby pusta.
  *
  * Wysyłka nie idzie na serwer, bo backendu nie ma. Formularz składa gotową
- * wiadomość i przekazuje ją do WhatsAppa albo do klienta poczty — pacjent
- * wysyła ją ze swojego numeru lub skrzynki, więc Mikołaj od razu ma kontakt
- * zwrotny. Brak `phoneE164` i `email` wyłącza wysyłkę i pokazuje to wprost,
- * zamiast udawać, że zgłoszenie gdzieś poleciało.
+ * wiadomość i przekazuje ją do klienta poczty — pacjent wysyła ją ze swojej
+ * skrzynki, więc Mikołaj od razu ma kontakt zwrotny. Brak `email` wyłącza
+ * wysyłkę i pokazuje to wprost, zamiast udawać, że zgłoszenie gdzieś poleciało.
+ *
+ * WIADOMOŚĆ IDZIE W JĘZYKU, W KTÓRYM PACJENT CZYTAŁ STRONĘ. Nazwy pól są
+ * tłumaczone razem z resztą, bo pacjent wysyła ją ze swojej skrzynki i musi
+ * rozumieć, co podpisuje. Zgłoszenie po angielsku jest sygnałem samym w sobie:
+ * mówi Mikołajowi, w jakim języku oddzwonić.
  */
-
-const WEEKDAYS = ["pon", "wt", "śr", "czw", "pt", "sob", "ndz"];
-
-const MONTHS = [
-  "styczeń", "luty", "marzec", "kwiecień", "maj", "czerwiec",
-  "lipiec", "sierpień", "wrzesień", "październik", "listopad", "grudzień",
-];
-
-const MONTHS_IN = [
-  "stycznia", "lutego", "marca", "kwietnia", "maja", "czerwca",
-  "lipca", "sierpnia", "września", "października", "listopada", "grudnia",
-];
 
 const startOfDay = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate());
 const addDays = (d: Date, n: number) =>
@@ -47,9 +41,6 @@ const toMinutes = (hhmm: string) => {
 
 const toHHMM = (minutes: number) =>
   `${String(Math.floor(minutes / 60)).padStart(2, "0")}:${String(minutes % 60).padStart(2, "0")}`;
-
-const longDate = (d: Date) =>
-  `${WEEKDAYS[mondayIndex(d)]}, ${d.getDate()} ${MONTHS_IN[d.getMonth()]} ${d.getFullYear()}`;
 
 /* ------------------------------------------------------------------ */
 /* ZEGAR                                                               */
@@ -72,13 +63,24 @@ const subscribeNever = () => () => {};
 
 /** Wszystkie godziny z grafiku — niezależnie od tego, czy jeszcze nie minęły. */
 function allSlots() {
-  const { from, to, stepMinutes } = booking.schedule;
+  const { from, to, stepMinutes } = bookingConfig.schedule;
   const out: number[] = [];
   for (let m = toMinutes(from); m <= toMinutes(to); m += stepMinutes) out.push(m);
   return out;
 }
 
 export function BookingForm() {
+  const t = useT();
+  const {
+    labels,
+    errors: errorMsg,
+    calendar,
+    message: messageText,
+    privacyNote,
+    orLabel,
+    callPrompt,
+  } = t.booking;
+
   /**
    * Kalendarz montujemy dopiero po stronie przeglądarki. „Dzisiaj” na serwerze
    * i w przeglądarce to dwie różne chwile, a bywa też, że i dwie różne strefy,
@@ -104,22 +106,33 @@ export function BookingForm() {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [complaint, setComplaint] = useState("");
-  const [service, setService] = useState("");
+  /* Indeks pozycji w cenniku, a nie jej nazwa — patrz `services` niżej. */
+  const [serviceIndex, setServiceIndex] = useState("");
   const [date, setDate] = useState<Date | null>(null);
   const [time, setTime] = useState("");
   const [showErrors, setShowErrors] = useState(false);
 
-  /** Usługi bierzemy z cennika, żeby lista nie rozjechała się z ofertą. */
+  /**
+   * Usługi bierzemy z cennika, żeby lista nie rozjechała się z ofertą.
+   *
+   * Przy zmianie języka wybrana pozycja przestaje pasować do nowej listy,
+   * bo to ten sam napis w innym języku. `<select>` pokazałby wtedy puste pole,
+   * a walidacja i tak by je przepuściła. Dlatego wybór trzymamy jako INDEKS,
+   * a nazwę odczytujemy dopiero przy składaniu wiadomości.
+   */
   const services = useMemo(
     () =>
-      pricing.groups.flatMap((group) =>
+      t.pricing.groups.flatMap((group) =>
         group.items.map((item) => item.name).filter((name) => !isTodo(name))
       ),
-    []
+    [t]
   );
 
-  const horizon = today ? addDays(today, booking.schedule.horizonDays) : null;
-  const leadMinutes = booking.schedule.leadTimeHours * 60;
+  /** Nazwa wybranej usługi w bieżącym języku. Pusta, dopóki nikt nie wybrał. */
+  const service = services[Number(serviceIndex)] ?? "";
+
+  const horizon = today ? addDays(today, bookingConfig.schedule.horizonDays) : null;
+  const leadMinutes = bookingConfig.schedule.leadTimeHours * 60;
 
   /** Czy w danym dniu został jeszcze jakikolwiek termin z wyprzedzeniem. */
   const daySlots = (day: Date) => {
@@ -132,7 +145,7 @@ export function BookingForm() {
 
   const dayEnabled = (day: Date) => {
     if (!today || !horizon) return false;
-    if (!booking.schedule.workdays.includes(day.getDay())) return false;
+    if (!bookingConfig.schedule.workdays.includes(day.getDay())) return false;
     if (day < today || day > horizon) return false;
     return daySlots(day).length > 0;
   };
@@ -161,60 +174,76 @@ export function BookingForm() {
     firstName: !firstName.trim(),
     lastName: !lastName.trim(),
     complaint: !complaint.trim(),
-    service: !service,
+    service: serviceIndex === "",
     date: !date,
     time: !time,
   };
   const hasErrors = Object.values(errors).some(Boolean);
 
-  const channelReady = Boolean(business.phoneE164) || !isTodo(business.email);
+  const channelReady = !isTodo(business.email);
+
+  /** Data w treści zgłoszenia, zapisana wg reguł danego języka. */
+  const longDate = (d: Date) =>
+    calendar.longDate(
+      calendar.weekdays[mondayIndex(d)],
+      d.getDate(),
+      calendar.monthsIn[d.getMonth()],
+      d.getFullYear()
+    );
+
+  const fullName = `${firstName.trim()} ${lastName.trim()}`;
 
   const message = () =>
     [
-      "Zgłoszenie wizyty ze strony LetFit",
+      messageText.title,
       "",
-      `Imię i nazwisko: ${firstName.trim()} ${lastName.trim()}`,
-      `Usługa: ${service}`,
-      `Proponowany termin: ${date ? longDate(date) : ""}, godz. ${time}`,
+      `${messageText.name}: ${fullName}`,
+      `${messageText.service}: ${service}`,
+      `${messageText.slot}: ${date ? longDate(date) : ""}, ${messageText.at} ${time}`,
       "",
-      `Dolegliwości: ${complaint.trim()}`,
+      `${messageText.complaint}: ${complaint.trim()}`,
     ].join("\n");
 
-  const send = (channel: "wa" | "mail") => {
+  const send = () => {
     setShowErrors(true);
     if (hasErrors) {
       document.getElementById("zgloszenie-blad")?.scrollIntoView({ block: "center" });
       return;
     }
-    const text = message();
-    if (channel === "wa" && waLink) {
-      window.open(`${waLink}?text=${encodeURIComponent(text)}`, "_blank", "noopener");
-      return;
-    }
-    const subject = `Zgłoszenie wizyty: ${firstName.trim()} ${lastName.trim()}`;
     window.location.href = `mailto:${business.email}?subject=${encodeURIComponent(
-      subject
-    )}&body=${encodeURIComponent(text)}`;
+      messageText.subject(fullName)
+    )}&body=${encodeURIComponent(message())}`;
   };
 
   const field =
     "w-full rounded-btn border border-ink/20 bg-paper px-4 py-3 text-base text-ink " +
     "outline-none transition-colors placeholder:text-ink-40 focus:border-blue";
   const label = "mb-2 block text-sm font-semibold text-ink-80";
-  const errorText = "mt-1.5 block text-sm text-blue";
+  const errorClass = "mt-1.5 block text-sm text-blue";
 
   return (
-    /* `items-start`: karta z terminem jest wyższa od karty z danymi, a przy
-       rozciąganiu na równą wysokość pod polem opisu zostawało puste dno. */
+    /*
+      TRZY KOMÓRKI, DWIE KOLUMNY.
+
+      `items-start`: karta z terminem jest wyższa od karty z danymi, a przy
+      rozciąganiu na równą wysokość pod polem opisu zostawało puste dno.
+
+      Kolejność w DOM to dane → termin → notka i telefon, bo taka jest właściwa
+      na telefonie: pacjent wypełnia pola, wybiera termin, wysyła, a dopiero
+      potem czyta drobny druk i widzi wyjście na rozmowę. Na desktopie jawne
+      `col-start`/`row-start` przesuwają notkę i telefon z powrotem POD dane,
+      w lewą kolumnę — to one domykają pustkę, którą zostawiała tam wyższa
+      karta z terminem.
+    */
     <div className="mt-12 grid items-start gap-8 lg:grid-cols-[1fr_0.9fr] lg:gap-12">
       {/* ---------------------------------------------------------- */}
       {/* DANE PACJENTA                                              */}
       {/* ---------------------------------------------------------- */}
-      <div className="rounded-card border border-ink/12 bg-paper p-6 md:p-8">
+      <div className="rounded-card border border-ink/12 bg-paper p-6 md:p-8 lg:col-start-1 lg:row-start-1">
         <div className="grid gap-5 sm:grid-cols-2">
           <div>
             <label className={label} htmlFor="imie">
-              {booking.labels.firstName}
+              {labels.firstName}
             </label>
             <input
               id="imie"
@@ -226,13 +255,13 @@ export function BookingForm() {
               aria-invalid={showErrors && errors.firstName}
             />
             {showErrors && errors.firstName && (
-              <span className={errorText}>Podaj imię.</span>
+              <span className={errorClass}>{errorMsg.firstName}</span>
             )}
           </div>
 
           <div>
             <label className={label} htmlFor="nazwisko">
-              {booking.labels.lastName}
+              {labels.lastName}
             </label>
             <input
               id="nazwisko"
@@ -244,51 +273,51 @@ export function BookingForm() {
               aria-invalid={showErrors && errors.lastName}
             />
             {showErrors && errors.lastName && (
-              <span className={errorText}>Podaj nazwisko.</span>
+              <span className={errorClass}>{errorMsg.lastName}</span>
             )}
           </div>
         </div>
 
         <div className="mt-5">
           <label className={label} htmlFor="usluga">
-            {booking.labels.service}
+            {labels.service}
           </label>
           <select
             id="usluga"
             name="usluga"
             className={`${field} appearance-none`}
-            value={service}
-            onChange={(e) => setService(e.target.value)}
+            value={serviceIndex}
+            onChange={(e) => setServiceIndex(e.target.value)}
             aria-invalid={showErrors && errors.service}
           >
-            <option value="">{booking.labels.servicePlaceholder}</option>
-            {services.map((name) => (
-              <option key={name} value={name}>
+            <option value="">{labels.servicePlaceholder}</option>
+            {services.map((name, i) => (
+              <option key={name} value={i}>
                 {name}
               </option>
             ))}
           </select>
           {showErrors && errors.service && (
-            <span className={errorText}>Wybierz usługę.</span>
+            <span className={errorClass}>{errorMsg.service}</span>
           )}
         </div>
 
         <div className="mt-5">
           <label className={label} htmlFor="dolegliwosci">
-            {booking.labels.complaint}
+            {labels.complaint}
           </label>
           <textarea
             id="dolegliwosci"
             name="dolegliwosci"
             rows={5}
             className={`${field} resize-y`}
-            placeholder={booking.labels.complaintHint}
+            placeholder={labels.complaintHint}
             value={complaint}
             onChange={(e) => setComplaint(e.target.value)}
             aria-invalid={showErrors && errors.complaint}
           />
           {showErrors && errors.complaint && (
-            <span className={errorText}>Napisz w dwóch zdaniach, co ci dolega.</span>
+            <span className={errorClass}>{errorMsg.complaint}</span>
           )}
         </div>
       </div>
@@ -299,8 +328,8 @@ export function BookingForm() {
       {/* Na telefonie karta i ramka kalendarza mają węższe marginesy — każdy
           odzyskany piksel idzie na kratki dni, które inaczej robią się za małe
           na palec. */}
-      <div className="rounded-card border border-ink/12 bg-paper p-4 md:p-8">
-        <p className={label}>{booking.labels.date}</p>
+      <div className="rounded-card border border-ink/12 bg-paper p-4 md:p-8 lg:col-start-2 lg:row-start-1 lg:row-span-2">
+        <p className={label}>{labels.date}</p>
 
         {/* Do czasu zamontowania trzymamy wysokość siatki, żeby karta nie skakała. */}
         {!month || !today ? (
@@ -314,13 +343,13 @@ export function BookingForm() {
                   setMonthPick(new Date(month.getFullYear(), month.getMonth() - 1, 1))
                 }
                 disabled={!canGoBack}
-                aria-label="Poprzedni miesiąc"
+                aria-label={calendar.prevMonth}
                 className="rounded-btn px-3 py-1.5 text-lg leading-none text-ink-60 transition-colors hover:bg-ink/5 disabled:cursor-not-allowed disabled:opacity-30"
               >
                 ‹
               </button>
               <p className="font-display text-[15px] font-semibold">
-                {MONTHS[month.getMonth()]} {month.getFullYear()}
+                {calendar.months[month.getMonth()]} {month.getFullYear()}
               </p>
               <button
                 type="button"
@@ -328,7 +357,7 @@ export function BookingForm() {
                   setMonthPick(new Date(month.getFullYear(), month.getMonth() + 1, 1))
                 }
                 disabled={!canGoForward}
-                aria-label="Następny miesiąc"
+                aria-label={calendar.nextMonth}
                 className="rounded-btn px-3 py-1.5 text-lg leading-none text-ink-60 transition-colors hover:bg-ink/5 disabled:cursor-not-allowed disabled:opacity-30"
               >
                 ›
@@ -336,7 +365,7 @@ export function BookingForm() {
             </div>
 
             <div className="mt-3 grid grid-cols-7 gap-1 text-center text-[11px] font-semibold tracking-wide text-ink-40 uppercase">
-              {WEEKDAYS.map((d) => (
+              {calendar.weekdays.map((d) => (
                 <span key={d} className="py-1">
                   {d}
                 </span>
@@ -372,11 +401,13 @@ export function BookingForm() {
             </div>
           </div>
         )}
-        {showErrors && errors.date && <span className={errorText}>Wybierz dzień.</span>}
+        {showErrors && errors.date && (
+          <span className={errorClass}>{errorMsg.date}</span>
+        )}
 
-        <p className={`${label} mt-6`}>{booking.labels.time}</p>
+        <p className={`${label} mt-6`}>{labels.time}</p>
         {!date ? (
-          <p className="text-sm text-ink-40">Najpierw wybierz dzień z kalendarza.</p>
+          <p className="text-sm text-ink-40">{calendar.pickDayFirst}</p>
         ) : (
           <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
             {slotsForSelected.map((m) => {
@@ -399,7 +430,9 @@ export function BookingForm() {
             })}
           </div>
         )}
-        {showErrors && errors.time && <span className={errorText}>Wybierz godzinę.</span>}
+        {showErrors && errors.time && (
+          <span className={errorClass}>{errorMsg.time}</span>
+        )}
 
         {/* ---------------------------------------------------------- */}
         {/* WYSYŁKA                                                    */}
@@ -407,37 +440,48 @@ export function BookingForm() {
         <div className="mt-8 border-t border-ink/10 pt-6">
           {showErrors && hasErrors && (
             <p id="zgloszenie-blad" className="mb-4 text-sm text-blue">
-              Uzupełnij zaznaczone pola. Bez nich nie wiem, z czym i kiedy przychodzisz.
+              {errorMsg.summary}
             </p>
           )}
 
           {channelReady ? (
-            <div className="flex flex-wrap gap-3">
-              {waLink && (
-                <button
-                  type="button"
-                  onClick={() => send("wa")}
-                  className="inline-flex items-center justify-center gap-2 rounded-btn bg-blue px-6 py-3.5 text-sm font-semibold text-paper transition-colors hover:bg-blue-bright hover:text-ink"
-                >
-                  {booking.labels.submitWhatsApp}
-                </button>
-              )}
-              {!isTodo(business.email) && (
-                <button
-                  type="button"
-                  onClick={() => send("mail")}
-                  className="inline-flex items-center justify-center gap-2 rounded-btn border border-ink/25 px-6 py-3.5 text-sm font-semibold text-ink transition-colors hover:border-ink hover:bg-ink/[0.04]"
-                >
-                  {booking.labels.submitEmail}
-                </button>
-              )}
-            </div>
+            <button
+              type="button"
+              onClick={send}
+              className="inline-flex items-center justify-center gap-2 rounded-btn bg-blue px-6 py-3.5 text-sm font-semibold text-paper transition-colors hover:bg-blue-bright hover:text-ink"
+            >
+              {labels.submitEmail}
+            </button>
           ) : (
             <p className="rounded-btn border border-blue/30 bg-blue/5 px-4 py-3 text-sm text-ink-60">
-              {booking.labels.missingChannel}
+              {labels.missingChannel}
             </p>
           )}
         </div>
+      </div>
+
+      {/* ---------------------------------------------------------- */}
+      {/* DROBNY DRUK I DRUGA DROGA                                  */}
+      {/* ---------------------------------------------------------- */}
+      <div className="lg:col-start-1 lg:row-start-2">
+        {privacyNote && (
+          <p className="text-sm leading-relaxed text-ink-40">{privacyNote}</p>
+        )}
+
+        {/* Wyjście na telefon, gdyby ktoś nie chciał wypełniać formularza ani
+            czekać na odpowiedź. Wyśrodkowane w kolumnie: „Lub" pracuje tu jako
+            rozdzielnik między dwiema drogami, a rozdzielnik dosunięty do
+            krawędzi przestaje nim być. */}
+        {telLink && (
+          <div className="mt-10 flex flex-col items-center text-center">
+            <p className="font-display text-lg text-ink/30">{orLabel}</p>
+            <p className="mt-3 text-lg leading-relaxed text-ink-80">{callPrompt}</p>
+            <ButtonLink href={telLink} className="mt-5">
+              <PhoneIcon />
+              {business.phoneDisplay}
+            </ButtonLink>
+          </div>
+        )}
       </div>
     </div>
   );

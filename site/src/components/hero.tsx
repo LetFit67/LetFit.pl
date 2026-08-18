@@ -1,6 +1,9 @@
+"use client";
+
 import type { CSSProperties } from "react";
 import Image from "next/image";
-import { booking, business, collaborations, hero, telLink } from "@/content/site";
+import { bookingConfig, business, collaborationLogos, telLink } from "@/content/site";
+import { useT } from "@/lib/i18n";
 import { HeroRotatingLine } from "./hero-rotating-line";
 import { HeroRunnerBackdrop, HeroRunnerLayer } from "./hero-runner";
 import {
@@ -12,6 +15,9 @@ import {
 } from "./ui";
 
 export function Hero() {
+  const t = useT();
+  const hero = t.hero;
+
   return (
     <section
       id="top"
@@ -122,10 +128,10 @@ export function Hero() {
             style={{ "--delay": "640ms" } as CSSProperties}
             className="hero-in mt-10 flex flex-wrap gap-3"
           >
-            {booking.enabled ? (
+            {bookingConfig.enabled ? (
               <ButtonLink href="#rezerwacja">
                 <CalendarIcon />
-                Umów wizytę
+                {t.ui.book}
               </ButtonLink>
             ) : (
               business.booksyUrl && (
@@ -135,26 +141,23 @@ export function Hero() {
                   rel="noopener noreferrer"
                 >
                   <CalendarIcon />
-                  Rezerwuj w Booksy
+                  {t.ui.bookBooksy}
                 </ButtonLink>
               )
             )}
             {telLink && (
               <ButtonLink
                 href={telLink}
-                variant={booking.enabled || business.booksyUrl ? "outline" : "primary"}
+                variant={bookingConfig.enabled || business.booksyUrl ? "outline" : "primary"}
               >
                 <PhoneIcon />
                 {business.phoneDisplay}
               </ButtonLink>
             )}
-            {/* WhatsApp CELOWO nie występuje w hero — pierwszy ekran ma dwie
-                drogi działania, nie trzy. Pozostaje w sekcji kontaktu
-                i w formularzu zgłoszenia. */}
-            {!booking.enabled && !business.booksyUrl && !telLink && (
+            {!bookingConfig.enabled && !business.booksyUrl && !telLink && (
               <ButtonLink href="#kontakt">
                 <CalendarIcon />
-                Umów wizytę
+                {t.ui.book}
               </ButtonLink>
             )}
           </div>
@@ -188,7 +191,8 @@ export function Hero() {
 const MARQUEE_COPIES = 8;
 
 export function Collaborations() {
-  if (collaborations.items.length === 0) return null;
+  const t = useT();
+  if (collaborationLogos.length === 0) return null;
 
   return (
     <section className="marquee-viewport overflow-hidden border-b border-ink/10 bg-mist py-6">
@@ -206,7 +210,7 @@ export function Collaborations() {
       */}
       <div className="container-x relative flex items-center">
         <p className="relative z-10 shrink-0 bg-mist pr-6 text-xs font-semibold tracking-[0.18em] text-ink-40 uppercase">
-          {collaborations.lead}
+          {t.collaborations.lead}
         </p>
 
         {/*
@@ -243,7 +247,7 @@ export function Collaborations() {
 function ClubBadge({
   item,
 }: {
-  item: (typeof collaborations.items)[number];
+  item: (typeof collaborationLogos)[number];
 }) {
   const shape = item.shape === "rounded" ? "rounded-[0.55rem]" : "rounded-full";
   const frame = `size-9 shrink-0 overflow-hidden ${shape} ring-1 ring-ink/10`;
@@ -274,6 +278,8 @@ function ClubBadge({
 }
 
 function ClubTape({ duplicate = false }: { duplicate?: boolean }) {
+  const t = useT();
+
   return (
     /*
       Odstępy są duże celowo. Przy ciasnym rozstawie w kadr wchodziło po kilka
@@ -285,14 +291,14 @@ function ClubTape({ duplicate = false }: { duplicate?: boolean }) {
       className="flex shrink-0 items-center gap-x-24 pr-24 md:gap-x-32 md:pr-32"
       aria-hidden={duplicate || undefined}
     >
-      {collaborations.items.map((item) => (
+      {collaborationLogos.map((item) => (
         <li
-          key={item.name}
+          key={item.id}
           className="flex shrink-0 items-center gap-3.5 whitespace-nowrap"
         >
           <ClubBadge item={item} />
           <span className="font-display text-[15px] font-semibold text-ink-80">
-            {item.name}
+            {t.collaborations.names[item.id]}
           </span>
         </li>
       ))}

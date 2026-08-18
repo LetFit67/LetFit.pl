@@ -103,6 +103,29 @@
 }
 
 /*
+  Pasek nagłówka jest SZERSZY niż treść pod nim (88rem zamiast 76rem).
+
+  To świadome odstępstwo od wspólnej siatki: przy 76rem logo, siedem pozycji
+  menu, telefon, przycisk i przełącznik języka mieściły się z zapasem 26 px
+  i wyglądały na wciśnięte, a na szerokim monitorze pasek stał ściśnięty
+  pośrodku wielkich marginesów. Szerszy kontener kupuje 128 px, które idą
+  w całości na odstępy.
+
+  Cena: logo nie stoi już w jednej pionowej linii z tekstem sekcji poniżej.
+  Zaakceptowane przy zwiększaniu odstępów (decyzja Mikołaja, 18.08.2026).
+*/
+@utility container-header {
+  width: 100%;
+  max-width: 88rem;
+  margin-inline: auto;
+  padding-inline: 1.25rem;
+
+  @media (width >= 48rem) {
+    padding-inline: 2rem;
+  }
+}
+
+/*
   ANIMACJA HERO — celowo powściągliwa.
 
   Elementy wchodzą raz, przy załadowaniu strony: łagodne wypłynięcie w górę

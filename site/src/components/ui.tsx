@@ -1,6 +1,9 @@
+"use client";
+
 import Image from "next/image";
 import type { ComponentProps, ReactNode } from "react";
 import { isTodo } from "@/content/site";
+import { useT } from "@/lib/i18n";
 
 /* ------------------------------------------------------------------ */
 /* LOGO                                                                */
@@ -38,10 +41,11 @@ type LogoProps = {
  */
 export function Logo({ variant = "horizontal", className, priority }: LogoProps) {
   const cfg = LOGO_FILES[variant];
+  const t = useT();
   return (
     <Image
       src={`/brand/${cfg.file}.png`}
-      alt="LetFit, Mikołaj Letkiewicz, fizjoterapia"
+      alt={t.ui.logoAlt}
       width={cfg.w}
       height={cfg.h}
       className={className}
@@ -189,6 +193,10 @@ export function ButtonLink({
 /**
  * Renderuje wartość z pliku treści. Jeżeli to nieuzupełniony placeholder,
  * pokazuje go w widocznej ramce — żeby nie dało się wypuścić strony z luką.
+ *
+ * Znacznik [UZUPEŁNIJ] zostaje po polsku także w wersji angielskiej. To notatka
+ * dla prowadzącego stronę, a nie treść dla pacjenta, i ma wyglądać tak samo
+ * niezależnie od tego, w którym języku ktoś ją zobaczy.
  */
 export function Val({
   children,
@@ -201,7 +209,7 @@ export function Val({
   return (
     <span
       className={`inline-block rounded border border-dashed border-blue/70 bg-blue-soft px-2 py-0.5 text-[0.8em] font-medium text-blue ${className}`}
-      title="Uzupełnij tę wartość w src/content/site.ts"
+      title="Uzupełnij tę wartość w src/content/site.ts albo w słowniku języka"
     >
       {children}
     </span>
@@ -226,14 +234,6 @@ export function PhoneIcon({ className = "size-4" }) {
   return (
     <svg {...iconProps} className={className}>
       <path d="M6.5 3h-2A1.5 1.5 0 0 0 3 4.6C3 13 11 21 19.4 21a1.5 1.5 0 0 0 1.6-1.5v-2a1 1 0 0 0-.8-1l-3.3-.7a1 1 0 0 0-1 .4l-.9 1.2a13.6 13.6 0 0 1-5.4-5.4l1.2-.9a1 1 0 0 0 .4-1l-.7-3.3a1 1 0 0 0-1-.8Z" />
-    </svg>
-  );
-}
-
-export function WhatsAppIcon({ className = "size-4" }) {
-  return (
-    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" className={className}>
-      <path d="M12 2a10 10 0 0 0-8.6 15L2 22l5.2-1.4A10 10 0 1 0 12 2Zm0 18.2a8.2 8.2 0 0 1-4.2-1.2l-.3-.2-3.1.8.8-3-.2-.3A8.2 8.2 0 1 1 12 20.2Zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.5.1l-.8 1c-.1.2-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.1-.2 0-.4.1-.5l.4-.5c.1-.2.1-.3 0-.5l-.7-1.7c-.2-.4-.4-.4-.5-.4h-.5a1 1 0 0 0-.7.3c-.3.3-.9.9-.9 2.1s.9 2.5 1 2.6c.1.2 1.8 2.8 4.4 3.9a5 5 0 0 0 2.5.5c.7-.1 1.5-.6 1.7-1.2.2-.6.2-1.1.2-1.2-.1-.2-.2-.2-.4-.3Z" />
     </svg>
   );
 }

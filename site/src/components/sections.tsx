@@ -1,15 +1,8 @@
+"use client";
+
 import Image from "next/image";
-import {
-  about,
-  equipment,
-  faq,
-  forWhom,
-  portfolio,
-  pricing,
-  process,
-  services,
-  testimonials,
-} from "@/content/site";
+import { photos } from "@/content/site";
+import { useT } from "@/lib/i18n";
 import { ExpandHint, HoverReveal } from "./hover-reveal";
 import { ForWhomGrid } from "./for-whom";
 import { PhotoPlaceholder } from "./hero";
@@ -30,6 +23,8 @@ import {
 /* ------------------------------------------------------------------ */
 
 export function ForWhom() {
+  const { forWhom } = useT();
+
   return (
     <Section id="dla-kogo" tone="mist">
       <div>
@@ -47,6 +42,9 @@ export function ForWhom() {
 /* ------------------------------------------------------------------ */
 
 export function Services() {
+  const t = useT();
+  const { services } = t;
+
   return (
     <Section id="uslugi">
       <div>
@@ -108,7 +106,7 @@ export function Services() {
               href="#rezerwacja"
               className="mt-8 inline-flex items-center gap-2 text-sm font-semibold text-ink transition-colors hover:text-blue"
             >
-              Umów wizytę
+              {t.ui.book}
               <ArrowIcon className="size-4 transition-transform group-hover:translate-x-1" />
             </a>
           </article>
@@ -140,6 +138,8 @@ export function Services() {
 /* ------------------------------------------------------------------ */
 
 export function Equipment() {
+  const { equipment } = useT();
+
   // Bez wpisanego wyposażenia sekcja w ogóle się nie renderuje.
   if (equipment.items.length === 0) return null;
 
@@ -172,6 +172,8 @@ export function Equipment() {
 /* ------------------------------------------------------------------ */
 
 export function Process() {
+  const { process } = useT();
+
   return (
     <Section id="wizyta" tone="ink">
       <div>
@@ -195,6 +197,8 @@ export function Process() {
 /* ------------------------------------------------------------------ */
 
 export function About() {
+  const { about } = useT();
+
   return (
     <Section id="o-mnie">
       {/* Tekst jest krótki, a portret wysoki, więc przy `items-start` pod
@@ -205,9 +209,9 @@ export function About() {
       <div className="grid items-center gap-14 lg:grid-cols-[0.72fr_1.28fr] lg:gap-20">
         {/* Kadr 3:4 zgodny z proporcją portretu — dzięki temu nic nie jest przycięte. */}
         <div className="relative aspect-3/4 overflow-hidden rounded-card border border-ink/10 bg-mist-dim">
-          {about.photo ? (
+          {photos.portrait ? (
             <Image
-              src={about.photo}
+              src={photos.portrait}
               alt={about.photoAlt}
               fill
               sizes="(max-width: 1024px) 100vw, 40vw"
@@ -215,8 +219,8 @@ export function About() {
             />
           ) : (
             <PhotoPlaceholder
-              label="Portret Mikołaja"
-              hint="about.photo w src/content/site.ts"
+              label={about.photoPlaceholder}
+              hint="photos.portrait w src/content/site.ts"
             />
           )}
         </div>
@@ -254,6 +258,9 @@ export function About() {
 /* ------------------------------------------------------------------ */
 
 export function Portfolio() {
+  const t = useT();
+  const { portfolio } = t;
+
   // Bez prawdziwych metamorfoz sekcja w ogóle się nie renderuje.
   if (portfolio.items.length === 0) return null;
 
@@ -272,12 +279,10 @@ export function Portfolio() {
             className="overflow-hidden rounded-card border border-ink/12 bg-paper"
           >
             <div className="grid grid-cols-2 gap-px bg-ink/12">
-              {(
-                [
-                  { src: item.before, label: "Przed" },
-                  { src: item.after, label: "Po" },
-                ] as const
-              ).map((side) => (
+              {[
+                { src: item.before, label: t.ui.before },
+                { src: item.after, label: t.ui.after },
+              ].map((side) => (
                 <div key={side.label} className="relative aspect-3/4 bg-mist-dim">
                   <Image
                     src={side.src}
@@ -312,6 +317,8 @@ export function Portfolio() {
 /* ------------------------------------------------------------------ */
 
 export function Pricing() {
+  const { pricing } = useT();
+
   return (
     <Section id="cennik" tone="mist">
       <div>
@@ -409,6 +416,8 @@ export function Pricing() {
 /* ------------------------------------------------------------------ */
 
 export function Testimonials() {
+  const { testimonials } = useT();
+
   // Bez prawdziwych opinii sekcja w ogóle się nie renderuje.
   if (testimonials.items.length === 0) return null;
 
@@ -424,6 +433,7 @@ export function Testimonials() {
       <TestimonialsRail
         items={testimonials.items}
         source={testimonials.source}
+        dragHint={testimonials.dragHint}
       />
     </Section>
   );
@@ -434,6 +444,8 @@ export function Testimonials() {
 /* ------------------------------------------------------------------ */
 
 export function Faq() {
+  const { faq } = useT();
+
   return (
     /* Nagłówek szedł wcześniej w osobnej kolumnie obok listy. Przy ośmiu
        pytaniach kolumna z dwoma wierszami tekstu zostawiała obok siebie

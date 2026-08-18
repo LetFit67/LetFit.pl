@@ -1,5 +1,5 @@
 import type { MetadataRoute } from "next";
-import { seo } from "@/content/site";
+import { siteUrl } from "@/content/site";
 import { isPreview } from "@/lib/preview";
 
 export default function robots(): MetadataRoute.Robots {
@@ -11,6 +11,6 @@ export default function robots(): MetadataRoute.Robots {
 
   return {
     rules: { userAgent: "*", allow: "/", disallow: "/polityka-prywatnosci" },
-    sitemap: `${seo.siteUrl}/sitemap.xml`,
+    sitemap: `${siteUrl}/sitemap.xml`,
   };
 }

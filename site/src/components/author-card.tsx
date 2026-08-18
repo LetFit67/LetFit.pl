@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import Image from "next/image";
 import { credit } from "@/content/site";
+import { useT } from "@/lib/i18n";
 
 /* ------------------------------------------------------------------ */
 /* PIKTOGRAMY                                                          */
@@ -67,7 +68,15 @@ function ChevronIcon({ open }: { open: boolean }) {
  * zwykły link — również wtedy, gdy skrypt się nie wykona.
  */
 export function AuthorCard() {
+  const t = useT();
   const [open, setOpen] = useState(false);
+
+  /* Wiersze rozwijanej listy: ikona i wartość są danymi, etykieta tłumaczeniem. */
+  const items = [
+    { icon: "link", label: t.credit.items.site, value: credit.domain, href: credit.url },
+    { icon: "calendar", label: t.credit.items.year, value: credit.year, href: "" },
+    { icon: "code", label: t.credit.items.stack, value: credit.stack, href: "" },
+  ];
   const root = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -124,7 +133,7 @@ export function AuthorCard() {
               {credit.label}
             </span>
             <span className="block text-xs leading-tight text-ink-40">
-              {credit.role}
+              {t.credit.role}
             </span>
           </span>
         </a>
@@ -133,7 +142,7 @@ export function AuthorCard() {
           type="button"
           aria-expanded={open}
           aria-haspopup="menu"
-          aria-label={`Szczegóły wykonawcy: ${credit.label}`}
+          aria-label={t.credit.details(credit.label)}
           onClick={() => setOpen((v) => !v)}
           className="grid size-8 shrink-0 place-items-center rounded-btn text-ink-40 transition-colors hover:bg-mist hover:text-blue"
         >
@@ -147,7 +156,7 @@ export function AuthorCard() {
           className="absolute right-0 bottom-full z-20 mb-2 w-full rounded-card border border-ink/12 bg-paper p-2 shadow-lg shadow-ink/10"
         >
           <ul className="space-y-0.5">
-            {credit.items.map((item) => {
+            {items.map((item) => {
               const row = (
                 <>
                   <span className="flex flex-1 items-center gap-2.5 text-ink-60">
@@ -181,21 +190,21 @@ export function AuthorCard() {
             })}
           </ul>
 
-          {credit.cta.href && (
+          {credit.ctaUrl && (
             <>
               <div
                 aria-hidden="true"
                 className="my-2 h-px bg-linear-to-r from-transparent via-ink/15 to-transparent"
               />
               <a
-                href={credit.cta.href}
+                href={credit.ctaUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 role="menuitem"
                 onClick={() => setOpen(false)}
                 className="flex items-center justify-center gap-2 rounded-btn bg-blue-soft p-2.5 text-sm font-semibold text-blue transition-colors hover:bg-blue hover:text-paper"
               >
-                {credit.cta.label}
+                {t.credit.cta}
                 <span aria-hidden="true">→</span>
               </a>
             </>

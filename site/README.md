@@ -1,8 +1,9 @@
 # LETFIT — strona internetowa
 
-One-pager marki osobistej **Mikołaj Letkiewicz — fizjoterapeuta**.
-Next.js 16 (App Router) + Tailwind v4. Strona jest w całości statyczna — buduje się
-do plików i nie potrzebuje serwera aplikacyjnego.
+One-pager marki osobistej **Mikołaj Letkiewicz — fizjoterapeuta**, po polsku
+i po angielsku. Next.js 16 (App Router) + Tailwind v4. Strona jest w całości
+statyczna — buduje się do plików i nie potrzebuje serwera aplikacyjnego ani
+bazy danych.
 
 ## Uruchomienie
 
@@ -20,171 +21,231 @@ npm start       # podgląd builda
 
 ## Gdzie zmieniać treść
 
-**Wszystko siedzi w jednym pliku: `src/content/site.ts`.** Komponentów nie trzeba
-dotykać. Plik jest podzielony na sekcje odpowiadające sekcjom strony.
+Treść siedzi w trzech plikach w `src/content/` i granica między nimi biegnie
+w jednym miejscu:
+
+| Plik | Co tam jest |
+|---|---|
+| `site.ts` | **Fakty.** Telefon, adres, kwoty, adresy odnośników, ścieżki plików, przełączniki sekcji. Wszystko, czego zmiana byłaby błędem w obu językach naraz. |
+| `pl.ts` | **Polska treść.** Każde zdanie, które widać na stronie. Zwykle jedyny plik, który trzeba ruszyć. |
+| `en.ts` | **Angielska treść.** Ten sam kształt co `pl.ts`. |
+
+Reguła: jeżeli zmiana wartości byłaby błędem w obu językach naraz (inna cena,
+inny numer telefonu), wartość należy do `site.ts`. Jeżeli to samo trzeba
+powiedzieć innymi słowami — do słownika.
+
+Komponentów nie trzeba dotykać. Każdy plik jest podzielony na sekcje
+odpowiadające sekcjom strony.
+
+### Kwoty są w jednym egzemplarzu
+
+Ceny NIE są wpisane w cenniku, tylko w stałej `prices` w `site.ts`. Słowniki
+dokładają do nich wyłącznie walutę i opis:
+
+```ts
+price: `${prices.firstVisit} zł`      // pl.ts
+price: `${prices.firstVisit} PLN`     // en.ts
+```
+
+Podniesienie stawki to jedna zmiana w `site.ts`, widoczna od razu w obu
+wersjach. Tak samo `officeHours` — godziny przyjęć mają ten sam zapis cyfrowy
+w obu językach.
+
+### Znacznik `[UZUPEŁNIJ]`
 
 Wartości zapisane jako `TODO("…")` renderują się na stronie jako widoczny,
-błękitny znacznik `[UZUPEŁNIJ: …]`. To celowe — dopóki na stronie widać
-choć jeden taki znacznik, nie jest gotowa do publikacji.
+błękitny znacznik `[UZUPEŁNIJ: …]`. To celowe — dopóki na stronie widać choć
+jeden taki znacznik, nie jest gotowa do publikacji.
 
-### Skąd pochodzą dane
+Znacznik zostaje **po polsku również w wersji angielskiej**: to notatka dla
+prowadzącego stronę, a nie treść dla pacjenta, i ma wyglądać tak samo
+niezależnie od tego, w którym języku ktoś ją zobaczy.
 
-Opisy usług, adres gabinetu w Markach, wizyty domowe i odpowiedź „ile wizyt”
-pochodzą bezpośrednio od Mikołaja i **mają pierwszeństwo**. Opis „o mnie”, adres
-Kliniki Sosnowej i godziny w Wesołej pochodzą z profilu Booksy (staffer 718317).
-Ceny z Booksy nie zostały potwierdzone dla Marek, więc cennik czeka na nowe stawki —
-stare wartości zostały w komentarzach jako punkt odniesienia.
+### Co zostało do uzupełnienia
 
-### Do uzupełnienia przed publikacją
+Dane kontaktowe, cennik, adres i opinie są już prawdziwe. Zostały trzy rzeczy:
 
-| Gdzie w `site.ts` | Czego brakuje |
+| Gdzie | Czego brakuje |
 |---|---|
-| `business.phoneDisplay` / `phoneE164` | telefon (E.164 zasila `tel:` i WhatsApp) |
-| `business.email` | adres e-mail |
-| `business.legal` | nazwa działalności i NIP (stopka + polityka prywatności) |
-| `business.locations[0].hours` | godziny przyjęć w Markach |
-| `business.locations[1].mapsEmbedUrl` | mapa dla Wesołej — Marki mają już swoją, puste ukrywa mapę |
-| `booking.calLink` | identyfikator kalendarza Cal.com — patrz niżej |
-| `pricing.groups` | wszystkie czasy i ceny |
-| `about.credentials` | wykształcenie i kursy — pusta tablica ukrywa sekcję |
-| `portfolio.items` | metamorfozy podopiecznych — pusta tablica ukrywa sekcję |
-| `testimonials.items` | **prawdziwe** opinie pacjentów — pusta tablica ukrywa sekcję |
-| `seo.siteUrl` | docelowa domena |
+| `privacy.recipientsTodo` w słownikach | konkretna lista odbiorców danych w polityce prywatności — jedyny `[UZUPEŁNIJ]`, który realnie widać na stronie |
+| `bookingConfig.schedule` w `site.ts` | godziny 8:00–20:00 są punktem wyjścia, nie ustaleniem — **czekają na potwierdzenie od Mikołaja** |
+| `public/brand/clubs/kadra-polski.png` | plik pochodzi ze stocka i ma wtopiony znak wodny „pngtree" — do podmiany przed publikacją |
 
-### Dwie lokalizacje
+Puste tablice ukrywają całe sekcje i tak ma zostać, dopóki nie ma czym ich
+wypełnić: `about.credentials` (wykształcenie i kursy) oraz `portfolio.items`
+(metamorfozy — potrzebna zgoda pacjenta na publikację wizerunku).
 
-`business.locations` to tablica — Mikołaj przyjmuje w Markach i w Klinice Sosnowej
-w Warszawie Wesołej. Każda lokalizacja ma własne godziny i własny kanał rezerwacji
-(`bookingUrl`), żeby pacjent nie umówił się pod złym adresem. Pierwsza pozycja jest
-traktowana jako gabinet główny — trafia do danych strukturalnych i do polityki
-prywatności jako siedziba.
+## Dwa języki
 
-## Rezerwacja online (Cal.com)
+Przełącznik `PL | EN` stoi w nagłówku. Maszyneria siedzi w `src/lib/i18n.tsx`:
+magazyn wyboru na `useSyncExternalStore`, `LocaleProvider` i haki `useT()`
+oraz `useLocale()`.
 
-Sekcja „Rezerwacja” renderuje się dopiero wtedy, gdy `booking.calLink` w `site.ts`
-nie jest pusty. Dopóki jest pusty, na stronie nie ma kalendarza — lepiej żadnego
-niż taki, który niczego nie rezerwuje.
+**Wybór działa w przeglądarce, nie w adresie.** Nie ma `letfit.pl/en` — język
+siedzi w `localStorage` pod kluczem `letfit-jezyk`, a pierwsze wejście idzie za
+ustawieniem przeglądarki. Konsekwencje trzeba znać:
 
-### Konfiguracja krok po kroku
+- Google indeksuje **wyłącznie wersję polską**, bo taką dostaje z serwera.
+- Nie da się wysłać komuś odnośnika prosto do wersji angielskiej.
+- `hreflang` nie ma czego wskazać.
 
-1. Załóż konto na [cal.com](https://cal.com) (plan darmowy wystarcza dla jednej osoby).
-2. **Podłącz kalendarz** Mikołaja: *Settings → Calendars → Google Calendar*
-   (lub Outlook). To jest ten mechanizm, który sprawia, że zajęte terminy znikają —
-   Cal czyta zajętość i dopisuje nowe wizyty do tego samego kalendarza.
-3. Ustaw dostępność: *Availability* — godziny, w których wolno umawiać wizyty
-   w Markach.
-4. Utwórz typy wydarzeń. **Czasy trwania różnią się między usługami**, a jeden typ
-   wydarzenia ma jeden czas — dlatego zrób trzy, po jednym na grupę z cennika:
+Gdyby strona miała kiedyś ściągać obcojęzycznych pacjentów z wyszukiwarki,
+trzeba przejść na osobne ścieżki (`/en`) i renderować obie wersje na serwerze.
 
-   | Typ wydarzenia | Czas | Obejmuje |
-   |---|---|---|
-   | Wizyta fizjoterapeutyczna | wg cennika | pierwsza, kolejna, domowa |
-   | Ocena i korekta postawy | wg cennika | ocena postawy, wizyta korekcyjna |
-   | Trening personalny | wg cennika | trening, kolejny trening, prowadzenie online |
+**Brak tłumaczenia jest błędem kompilacji.** `en.ts` jest typowany kształtem
+`pl.ts` (`export type Content = typeof pl`), więc nowy klucz w polskim słowniku
+wywala `npm run build`, dopóki nie dopiszesz angielskiego odpowiednika. To
+celowe: brakujące tłumaczenie ma być błędem builda, a nie pustym miejscem
+odkrytym przez pacjenta.
 
-   `calLink` to fragment adresu wydarzenia w formacie `użytkownik/nazwa-wydarzenia`.
-   Podanie samej nazwy użytkownika (`letfit`) osadza stronę ze **wszystkimi** typami
-   naraz — wygodne, gdy chcesz, żeby pacjent najpierw wybrał rodzaj wizyty.
-5. W zakładce **Advanced → Booking questions** dodaj pola:
+### Granice klienta
 
-   | Pole | Typ w Cal.com | Wymagane |
-   |---|---|---|
-   | Imię i nazwisko | wbudowane `Your name` | tak |
-   | E-mail | wbudowane `Email` | tak (nieusuwalne — służy do potwierdzenia) |
-   | Numer telefonu | `Phone` | tak |
-   | Rodzaj usługi | `Select` z listą pozycji z cennika | tak |
-   | Dodatkowe informacje o dolegliwościach | `Long text` | **nie** |
+Przełącznik podmienia treść bez przeładowania, więc każdy komponent z tekstem
+musi umieć się przerysować — czyli musi być po stronie klienta. Dyrektywa
+`"use client"` stoi w dwóch miejscach: `components/site-shell.tsx` (strona
+główna) i `components/privacy-shell.tsx` (polityka prywatności). Wciągają one
+w pakiet kliencki wszystko, co importują, więc nie trzeba jej powtarzać
+w każdej sekcji.
 
-   Pole z dolegliwościami musi zostać nieobowiązkowe — to dane o zdrowiu.
+Poza tą granicą zostają dwie rzeczy, obie **zawsze po polsku**:
 
-   Gotowa lista do wklejenia w pole `Select` „Rodzaj usługi” (zgodna z cennikiem):
+- `components/json-ld.tsx` — dane strukturalne,
+- metadane z `app/layout.tsx` — tytuł i opis w `<head>`.
 
-   ```
-   Pierwsza wizyta fizjoterapeutyczna
-   Kolejna wizyta fizjoterapeutyczna
-   Wizyta domowa
-   Ocena postawy
-   Wizyta korekcyjna
-   Trening personalny
-   Trening personalny — kolejny
-   Prowadzenie online
-   ```
-6. Wklej `calLink` do `booking.calLink` w `site.ts`. Kalendarz pojawi się na stronie,
-   a w nawigacji dojdzie pozycja „Rezerwacja”. Wszystkie przyciski CTA przełączą się
-   z Booksy na kalendarz.
+Robot i tak dostaje z serwera wyłącznie wersję polską, więc opisywanie mu
+treści, której nie widzi, byłoby wpisem o nieistniejącej stronie. Sam tytuł
+zakładki podmienia po hydratacji `LocaleProvider` — szczegóły i pułapka z tym
+związana są opisane w komentarzu w `i18n.tsx`.
 
-### RODO
+### Opinie po angielsku są tłumaczeniem
 
-Formularz zbiera dane o zdrowiu, więc Cal.com staje się podmiotem przetwarzającym.
-Przed uruchomieniem podpisz z nimi umowę powierzenia (DPA — dostępna z poziomu
-ustawień konta) i sprawdź, czy sekcja o rezerwacji w polityce prywatności zgadza się
-ze stanem faktycznym. Polityka wykrywa `booking.calLink` i sama dopisuje akapit
-o Cal.com, kiedy kalendarz jest włączony.
+Każdy angielski cytat ma to napisane w podpisie („translated from Polish").
+Bez tego czytelnik brałby te zdania za oryginalne słowa pacjenta. Wzorem jest
+sama wizytówka Google, która tak oznacza opinię przełożoną z francuskiego.
 
-### Wymiana Cal.com na inny serwis
+## Zgłoszenie wizyty
 
-Cal.com jest tu osadzony jako `iframe`, więc nie ma między nim a stroną żadnej
-warstwy danych do przepisania — strona nie pobiera terminów ani nie tworzy
-rezerwacji. Podmiana dostawcy sprowadza się do **zastąpienia jednego komponentu**
-`components/booking.tsx`; `page.tsx`, nawigacja i przyciski CTA zostają bez zmian,
-bo sterują się polem `booking.calLink`.
+Sekcja „Rezerwacja” to **własny formularz zgłoszenia**
+(`components/booking-form.tsx`), nie system rezerwacji. Cal.com został
+porzucony — wymagał konta, synchronizacji kalendarza i konfiguracji pytań,
+a Mikołaj wolał prostsze rozwiązanie.
 
-Warstwa abstrakcji nad dostawcą ma sens dopiero wtedy, gdy zrezygnujemy z osadzania
-i zaczniemy sami rysować kalendarz — wtedy potrzebne będą dwie operacje (pobierz
-wolne terminy, utwórz rezerwację) i funkcje serwerowe. Do tego czasu byłaby to
-pusta komplikacja.
+**Czym to NIE jest.** Strona nie zna kalendarza Mikołaja, więc kalendarzyk
+w formularzu pokazuje **grafik pracy**, a nie wolne terminy. Wybrany termin
+jest prośbą pacjenta, którą Mikołaj potwierdza osobiście. Cała treść na stronie
+mówi to wprost i tak ma zostać — inaczej ktoś przyjdzie przekonany, że ma
+rezerwację.
 
-### Booksy
+Wygaszone są dni spoza grafiku, dni z przeszłości, dni za horyzontem zapisów
+oraz te, w których nie został już ani jeden termin z zachowaniem wyprzedzenia.
+Ta ostatnia reguła jest istotna: bez niej dzisiejszy dzień o 21:00 dalej byłby
+klikalny, a lista godzin pod nim byłaby pusta.
 
-Booksy zostaje jako kanał rezerwacji **wyłącznie dla Kliniki Sosnowej** — link siedzi
-w `business.locations[1].bookingUrl`. Gdy `booking.calLink` jest ustawiony, główne CTA
-prowadzą do kalendarza na stronie, a Booksy pojawia się tylko przy karcie tej
-lokalizacji.
+### Konfiguracja
 
-### Mapa dojazdu
+Wszystko siedzi w `bookingConfig` w `site.ts`:
+
+| Pole | Znaczenie |
+|---|---|
+| `enabled` | wyłącznik całej sekcji — `false` chowa formularz i przestawia przyciski CTA na telefon |
+| `schedule.workdays` | dni pracy wg `Date.getDay()`, dziś `[1,2,3,4,5,6]` (pn–sob) |
+| `schedule.from` / `to` | pierwsza i ostatnia godzina, na którą można się zapisać |
+| `schedule.stepMinutes` | co ile minut proponujemy termin |
+| `schedule.horizonDays` | jak daleko w przód wolno wybierać dzień |
+| `schedule.leadTimeHours` | ile godzin przed wizytą zgłoszenie przestaje mieć sens |
+
+Teksty formularza — nagłówek, etykiety pól, komunikaty błędów i szkielet
+gotowej wiadomości — leżą w słownikach pod kluczem `booking`.
+
+### Wysyłka idzie e-mailem i tylko e-mailem
+
+Backendu nie ma, więc formularz niczego nie wysyła sam: składa gotową
+wiadomość i otwiera klienta poczty pacjenta (`business.email`). Pacjent wysyła
+ją ze swojej skrzynki, więc Mikołaj od razu ma kontakt zwrotny. Pusty
+`business.email` wyłącza wysyłkę i mówi o tym wprost, zamiast udawać, że
+zgłoszenie gdzieś poleciało.
+
+Wiadomość idzie **w języku, w którym pacjent czytał stronę**. Zgłoszenie po
+angielsku jest sygnałem samym w sobie: mówi Mikołajowi, w jakim języku
+oddzwonić.
+
+Wybrana usługa trzymana jest w stanie jako **indeks** pozycji cennika, a nie
+jej nazwa. Po zmianie języka nazwa przestałaby pasować do listy, `<select>`
+świeciłby pustką, a walidacja i tak by to przepuściła.
+
+Pod formularzem stoi druga droga: „Lub — zadzwoń i umów się już teraz”
+z przyciskiem na numer. Blok znika sam, gdy w `site.ts` nie ma telefonu.
+
+## Lokalizacja i mapa
+
+`business.locations` jest tablicą, ale ma dziś **jedną pozycję** — gabinet
+w Markach przy ul. Kościuszki 59. Klinika Sosnowa w Warszawie Wesołej
+i rezerwacja przez Booksy zostały usunięte w sierpniu 2026 (decyzja Mikołaja).
+Zostają gabinet w Markach oraz wizyty domowe, a terminy idą wyłącznie przez
+formularz.
+
+`business.booksyUrl` jest **celowo puste**. Wszystkie przyciski i odnośniki do
+Booksy są warunkowe, więc puste pole wystarcza, żeby zniknęły z nagłówka, hero,
+sekcji zgłoszenia i kontaktu. Wpisanie tu adresu przywróci je.
+
+Każda lokalizacja ma `id`, pod którym słowniki trzymają jej nazwę, etykietę,
+podpowiedź i godziny przyjęć. Pierwsza pozycja jest traktowana jako gabinet
+główny — trafia do danych strukturalnych i do polityki prywatności jako
+siedziba.
 
 Mapa renderuje się przy tej lokalizacji, która ma wypełnione `mapsEmbedUrl`.
-Teraz jest to wyłącznie gabinet w Markach. Adres osadzenia korzysta z formy
-`…/maps?q=…&output=embed`, która nie wymaga klucza do Maps Embed API i jest
-czytelna do ręcznej edycji. Wskazuje adres, nie konkretny lokal — gdy znany
-będzie dokładny punkt, najlepiej podmienić go na link z „Udostępnij → Umieść mapę”.
+Adres osadzenia korzysta z formy `…/maps?q=…&output=embed`, która nie wymaga
+klucza do Maps Embed API i jest czytelna do ręcznej edycji. Wskazuje adres,
+a nie konkretny lokal — gdy znany będzie dokładny punkt, najlepiej podmienić
+go na link z „Udostępnij → Umieść mapę”.
 
 Mapa ładuje się leniwie (`loading="lazy"`), więc nie obciąża pierwszego
 wyświetlenia. Uwaga RODO: jej wyświetlenie łączy przeglądarkę pacjenta
-z serwerami Google — polityka prywatności ma na ten temat osobną sekcję.
+z serwerami Google — polityka prywatności ma na ten temat osobną sekcję,
+a przycisk „Nawiguj” otwiera mapę dopiero po kliknięciu.
 
-### Zdjęcia
+## Zdjęcia
 
-Zapisz plik jako `public/photos/mikolaj-portret.jpg` i wpisz tę ścieżkę
-w `about.photo` (`"/photos/mikolaj-portret.jpg"`). Dopóki pole jest puste,
-renderuje się ramka z instrukcją zamiast zdjęcia. Kadr pionowy 4:5, sensowny
-rozmiar ok. 1200×1500 px.
+Ścieżki zdjęć leżą w `photos` w `site.ts`. Portret to
+`public/photos/mikolaj-portret.jpg`, kadr pionowy 3:4 (ok. 1200×1600 px).
+Dopóki pole jest puste, renderuje się ramka z instrukcją zamiast zdjęcia.
 
-Sekcja hero **nie używa zdjęcia** — jest tam rysunkowa animacja kręgosłupa
-(`components/hero-figure.tsx`).
+Sekcja hero **nie używa zdjęcia** — jest tam klip z biegaczem
+(`components/hero-runner.tsx`, `public/video/hero-runner.mp4` z klatką
+`hero-runner.jpg` jako poster).
 
 ## Marka
 
-Źródłem znaku jest `Logo concept/Logo faworyt 2.png`. Pliki na stronę generuje
-skrypt — nie edytuj ich ręcznie, bo następny build je nadpisze:
+Obowiązujący znak to piktogram biegacza z błękitnym łukiem. Pliki na stronę
+generuje skrypt z materiałów w `../brand/pictogram-2026/` — nie edytuj ich
+ręcznie, bo następne uruchomienie je nadpisze:
 
 ```bash
-node scripts/build-brand.mjs
+node scripts/build-brand-pictogram.mjs
 ```
 
 | Plik | Co zawiera | Gdzie używany |
 |---|---|---|
-| `public/brand/letfit-horizontal.png` | sygnet + „LetFit Physio / Fizjoterapia" obok | nagłówek, stopka |
-| `public/brand/letfit-emblem.png` | **sam sygnet, bez podpisu** | znak wodny w hero, małe formaty |
-| `public/brand/letfit-full.png` | układ pionowy z pełnym podpisem | materiały, zapas |
-| `src/app/icon.png` | favikona 512 px | automatycznie przez Next.js |
-| `src/app/apple-icon.png` | ikona iOS 180 px na białej płycie | automatycznie przez Next.js |
+| `public/brand/letfit-horizontal.png` | poziomy lockup: sygnet + napis „LetFit" | nagłówek, stopka |
+| `public/brand/letfit-mark.png` | **sam sygnet, bez podpisu** | znak wodny w hero |
+| `src/app/icon.png` | favikona: biały znak na granatowej płycie | automatycznie przez Next.js |
+| `src/app/apple-icon.png` | ikona iOS bez zaokrąglenia (iOS przycina róg sam) | automatycznie przez Next.js |
 
-**Favikona zawiera wyłącznie sygnet.** Podpis „LetFit Physio / FIZJOTERAPIA"
-jest z niej celowo wycięty — w rozmiarze 32 px zlewa się w nieczytelną plamę.
-Kadry są wyliczone z pikseli oryginału i opisane w nagłówku skryptu.
+**Favikona musi mieć granatową płytę z białym znakiem**, nie sam sygnet na
+przezroczystości — granat na granacie znikał w ciemnym pasku zakładek
+przeglądarki.
 
-Paleta wyprowadzona z kolorów odczytanych z logo:
+**Logo idzie przez `unoptimized`.** Przez `/_next/image?url=…` potrafiło się
+w ogóle nie pojawić w nagłówku, mimo poprawnego pliku i statusu 200: adres
+z parametrem `url=` bywa blokowany przez rozszerzenia przeglądarki i zapisywany
+w cache osobno od samego pliku. Dlatego pliki w `public/brand` dostają własną
+kompresję paletową w skrypcie i nie polegają na optymalizatorze.
+
+Znak jest granatowy na przezroczystym tle, więc działa tylko na jasnym
+podłożu. Na ciemnych sekcjach (przebieg wizyty, kontakt) logo się nie pojawia —
+nie ma wersji odwróconej.
+
+### Paleta i typografia
 
 | Token | HEX | Rola |
 |---|---|---|
@@ -196,118 +257,154 @@ Paleta wyprowadzona z kolorów odczytanych z logo:
 | `blue-soft` | `#E3EBF7` | delikatne plamy i chipy |
 
 **Ton wizualny jest gabinetowy, nie sportowy.** Nagłówki składane są szeryfem
-(Source Serif 4), tekst bieżący Interem. Narożniki są ostre (`--radius-card`
-0.375 rem), przyciski prostokątne, a błękit jest jedynym akcentem.
+(Source Serif 4), tekst bieżący Interem. Kafle i karty mają ostre narożniki
+(`--radius-card` 0.375 rem), a błękit jest jedynym akcentem.
 
-Znak jest granatowy na przezroczystym tle, więc działa tylko na jasnym podłożu.
-Na ciemnych sekcjach (przebieg wizyty, kontakt) logo się nie pojawia — nie ma
-wersji odwróconej.
+Wyjątkiem są **przyciski: pigułki** (`rounded-full`). To jedyne miejsce, gdzie
+odchodzimy od ostrych narożników — przycisk jest wezwaniem do działania i ma
+się odróżniać od kafli, które zostają kanciaste.
 
-### Animacja
+### Szerszy pasek nagłówka
 
-Animowane są trzy miejsca — reszta strony jest statyczna.
+Nagłówek ma własny kontener `container-header` (88 rem) zamiast wspólnego
+`container-x` (76 rem). Świadome odstępstwo od siatki: przy 76 rem logo, siedem
+pozycji menu, telefon, przycisk i przełącznik języka mieściły się z zapasem
+26 px i wyglądały na wciśnięte. Cena: logo nie stoi w jednej pionowej linii
+z tekstem sekcji poniżej.
 
-**Hero.** Elementy wchodzą raz przy załadowaniu strony, z niewielkim opóźnieniem
-między wierszami, sygnet w tle powoli „oddycha", a w miejscu zdjęcia pracuje
-rysunek kręgosłupa (`components/hero-figure.tsx`): fala mobilizacji schodzi
-kolejnymi kręgami, a po okręgu przesuwa się łuk zakresu ruchu. Klatki kluczowe
-rysunku zaczynają się i kończą w stanie neutralnym, a łuk pokonuje pełny obwód —
-zamrożony w czasie zerowym wygląda jak skończona ilustracja.
+Pasek z pozycjami pojawia się dopiero od `xl` (1280 px); niżej nawigacja idzie
+do menu pod hamburgerem. To jest zmierzone, nie dobrane na oko — przy pełnych
+odstępach cały rząd potrzebuje 1180 px po polsku i 1190 px po angielsku.
+**Każda nowa pozycja menu wymaga sprawdzenia szerokości w obu językach.**
 
-**Pas pod hero.** `components/hero-ribbon.tsx` — zapętlony klip z falującymi
-liniami (`public/video/hero-wave.mp4`, 421 KB). Element jest dekoracyjny:
-`aria-hidden`, bez dźwięku, z klatką `poster` na wypadek nieudanego wczytania,
-zatrzymywany przy `prefers-reduced-motion: reduce`.
+## Animacja
 
-Klip pochodzi z generatora Higgsfield. Surowe wyjście miało ciepłe, zaszumione
-tło, więc przeszło obróbkę: przycięcie do pasa z liniami, ochłodzenie kolorów
-do palety strony i kompresję. Oryginały wszystkich generowanych klipów leżą
-w `../Generowane klipy/` — **poza folderem strony**, żeby nic się przypadkiem
-nie opublikowało.
+**Hero.** Elementy wchodzą raz przy załadowaniu strony, z niewielkim
+opóźnieniem między wierszami (`hero-in`). Drugi wiersz nagłówka podmienia się
+co dwie sekundy (`components/hero-rotating-line.tsx`) — pierwsza pozycja
+rotacji jest wyjątkowa: to ona trafia do wyszukiwarek i czytników ekranu,
+reszta jest wyłącznie efektem wizualnym. Znak wodny powoli „oddycha"
+(`hero-breathe`), a w tle po prawej stronie leży klip z biegaczem.
 
-**Przebieg wizyty.** Cztery etapy pojawiają się po kolei, gdy sekcja wejdzie
-w kadr (`components/stagger.tsx`, opóźnienie 130 ms na krok). Animowana jest
-zawartość kafla, a nie sam kafel — kafle tworzą siatkę `gap-px`, więc wygaszenie
-`<li>` odsłoniłoby jasne tło spod spodu.
+**Pasek współpracy.** Nazwy klubów jadą w kółko (`marquee-track`, 8 kopii
+listy). Pasek siedzi w kontenerze strony, a nie na całej szerokości okna: na
+ekranie 2560 px rozciągnięty pokazywał 2,5 kopii naraz i te same trzy nazwy
+stały obok siebie.
+
+**Kafle „Dla kogo".** Przechył pod kursorem i poświata za nim, na własnych
+zdarzeniach myszy i zmiennych CSS. Po najechaniu na jeden pozostałe przygasają —
+pacjent szuka tu swojego objawu.
+
+**Przebieg wizyty.** Etapy jako mapa: zygzak, przerywana ścieżka i strzałka,
+która odsłania kolejne przystanki wraz z przewijaniem
+(`components/process-map.tsx`).
+
+**Opinie.** Poziomy pas przeciągany myszą, z wybiegiem po puszczeniu
+(`components/testimonials-rail.tsx`). Pas jest **zapętlony w obie strony**:
+lista renderuje się trzykrotnie, pas startuje na początku środkowej kopii,
+a skrypt przesuwa `scrollLeft` o szerokość jednej kopii, gdy pacjent wyjedzie
+poza jej zakres. Treść w miejscu skoku jest identyczna, więc skoku nie widać.
+Kopie 2 i 3 są `aria-hidden` — czytnik ekranu ma przeczytać siedem opinii,
+a nie dwadzieścia jeden.
 
 ### Dlaczego animacje nie potrafią ukryć treści
 
 Wszystkie efekty są zbudowane tak, żeby stanem domyślnym była pełna widoczność:
 
 - hero animuje **wyłącznie transformację**, nigdy krycia,
-- etapy wizyty ukrywa dopiero JavaScript, ustawiając `data-stagger="pending"` —
+- karty opinii ukrywa dopiero JavaScript, ustawiając `data-rail="pending"` —
   bez skryptu żadna reguła ukrywająca nie ma na czym zadziałać,
 - skrypt w ogóle się nie uzbraja, gdy karta jest niewidoczna w momencie startu
-  (`document.visibilityState !== "visible"`) albo gdy użytkownik prosi
-  o `prefers-reduced-motion: reduce`.
+  (`document.hidden`) albo gdy użytkownik prosi o `prefers-reduced-motion:
+  reduce`.
 
-Powód jest konkretny: w karcie otwartej w tle oś czasu dokumentu stoi, a przejście
-zamarza w stanie początkowym. Efekt startujący od `opacity: 0` zostawiłby wtedy
-pustą sekcję — również na zrzutach robionych przez boty.
-
-Wejście zbudowane jest na `@starting-style` i animuje **tylko transformację, nie
-krycie**. To celowe: gdy strona otworzy się w karcie w tle albo renderuje ją bot do
-zrzutów, oś czasu dokumentu stoi i przejście zamarza w stanie początkowym. Przy
-animacji krycia dałoby to pusty hero; tutaj najgorszy skutek to treść przesunięta
-o kilkanaście pikseli. `prefers-reduced-motion: reduce` wyłącza ruch całkowicie.
-
-Stopka autorska („Strona stworzona przez NikPage”) jest w `credit` w `site.ts`.
+Powód jest konkretny: w karcie otwartej w tle oś czasu dokumentu stoi,
+a przejście zamarza w stanie początkowym. Efekt startujący od `opacity: 0`
+zostawiłby wtedy pustą sekcję — również na zrzutach robionych przez boty.
 
 ## Struktura
 
 ```
 src/
   app/
-    layout.tsx                  fonty, metadane, OpenGraph
-    page.tsx                    złożenie sekcji one-pagera
-    globals.css                 tokeny marki + utilities
+    layout.tsx                  fonty, metadane, OpenGraph (zawsze po polsku)
+    page.tsx                    dane strukturalne + granica klienta
+    globals.css                 tokeny marki + utilities + animacje
     icon.png, apple-icon.png    favikony (generowane skryptem)
     robots.ts, sitemap.ts       SEO
     polityka-prywatnosci/       podstrona RODO (wymaga weryfikacji prawnej)
+    animacje/                   strona robocza, noindex, niepodlinkowana
   components/
-    header.tsx                  nagłówek + menu mobilne (komponent kliencki)
-    hero.tsx                    sekcja otwierająca + pasek współpracy ze sportowcami
-    hero-figure.tsx             rysunek kręgosłupa (animacja zamiast zdjęcia)
-    hero-ribbon.tsx             pas z falami pod hero (klip wideo)
-    stagger.tsx                 wejście etapów wizyty po kolei
-    sections.tsx                dla kogo, zakres opieki, przebieg, o mnie,
-                                metamorfozy, cennik, opinie, FAQ
-    booking.tsx                 kalendarz Cal.com (komponent kliencki)
-    contact.tsx                 kontakt, lokalizacje, stopka, pasek CTA na mobile
-    json-ld.tsx                 dane strukturalne (Physiotherapy + FAQPage)
+    site-shell.tsx              granica "use client" + złożenie sekcji
+    privacy-shell.tsx           to samo dla polityki prywatności
+    language-switcher.tsx       pigułka PL | EN
+    header.tsx                  nagłówek + menu mobilne
+    hero.tsx                    sekcja otwierająca + pasek współpracy
+    hero-runner.tsx             klip z biegaczem (warstwa tła)
+    hero-rotating-line.tsx      podmieniany drugi wiersz nagłówka
+    for-whom.tsx                kafle "Dla kogo" z przechyłem
+    sections.tsx                dla kogo, zakres opieki, sprzęt, przebieg,
+                                o mnie, metamorfozy, cennik, opinie, FAQ
+    process-map.tsx             mapa etapów wizyty
+    testimonials-rail.tsx       zapętlony pas opinii
+    hover-reveal.tsx            rozwijanie <details> po najechaniu
+    booking.tsx                 sekcja zgłoszenia
+    booking-form.tsx            formularz + kalendarzyk grafiku
+    contact.tsx                 kontakt, lokalizacja, stopka, pasek CTA mobile
+    author-card.tsx             podpis wykonawcy w stopce
+    json-ld.tsx                 dane strukturalne (zawsze po polsku, serwer)
     ui.tsx                      logo, przyciski, nagłówki sekcji, ikony
   content/
-    site.ts                     ← TREŚĆ STRONY
+    site.ts                     ← FAKTY (telefon, adres, kwoty, przełączniki)
+    pl.ts                       ← POLSKA TREŚĆ
+    en.ts                       ← ANGIELSKA TREŚĆ
+  lib/
+    i18n.tsx                    przełącznik języka: magazyn, provider, haki
+    preview.ts                  tryb podglądu (LETFIT_PREVIEW)
 ```
 
-Strona renderuje się na serwerze; klienckie są tylko nagłówek i kalendarz.
+Na serwerze renderują się tylko dane strukturalne i metadane — reszta strony
+jest kliencka, bo musi się przerysować po zmianie języka. Nie ma tu danych do
+pobrania ani sekretów do ukrycia, a cały JavaScript strony to i tak animacje,
+formularz i menu.
 
 ## Dane strukturalne
 
-`json-ld.tsx` generuje schema.org `Physiotherapy` i `FAQPage`. Pola, które nadal
-są placeholderami, są automatycznie pomijane — do Google nie trafi `[UZUPEŁNIJ]`.
+`json-ld.tsx` generuje schema.org `Physiotherapy` i `FAQPage`, **zawsze po
+polsku i zawsze na serwerze**. Pola, które są placeholderami, są automatycznie
+pomijane — do Google nie trafi `[UZUPEŁNIJ]`.
+
+Zakres cen liczy się z cennika, więc nie trzeba go utrzymywać osobno.
 
 ## Polityka prywatności
 
-`src/app/polityka-prywatnosci/page.tsx` zawiera szkielet oparty na typowych
-obowiązkach gabinetu fizjoterapii. **To nie jest porada prawna.** Przejrzyj treść,
-dopasuj do rzeczywistego sposobu przetwarzania danych i usuń błękitną ramkę
-ostrzegawczą na górze.
+`src/app/polityka-prywatnosci/page.tsx` renderuje `PrivacyShell` z treścią ze
+słowników. Wersja angielska jest tłumaczeniem tego samego dokumentu, nie osobną
+polityką — podstawy prawne (RODO, przepisy o dokumentacji medycznej) są
+identyczne.
+
+**To nie jest porada prawna.** Przejrzyj treść, dopasuj do rzeczywistego
+sposobu przetwarzania danych i usuń błękitną ramkę ostrzegawczą na górze
+(pole `privacy.draftNotice` — puste ukrywa ramkę).
+
+Podstrona ma `robots: { index: false, follow: true }` i jest wyłączona
+w `robots.txt`.
 
 ## Publikacja
 
-Strona jest statyczna, więc zadziała na Vercelu, Netlify i każdym hostingu Node.
-Najprościej:
+Strona jest statyczna, więc zadziała na Vercelu, Netlify i każdym hostingu
+Node. Najprościej:
 
 ```bash
 npx vercel
 ```
 
-Przed publikacją: podmień `seo.siteUrl` na docelową domenę i sprawdź, czy na
-stronie nie został żaden znacznik `[UZUPEŁNIJ]`.
+Przed publikacją: podmień `siteUrl` w `site.ts` na docelową domenę i sprawdź,
+czy na stronie nie został żaden znacznik `[UZUPEŁNIJ]`.
 
 **Uwaga przy imporcie repozytorium do Vercela: `Root Directory` musi wskazywać
-na `site`.** Aplikacja siedzi w podkatalogu, w korzeniu repo leżą materiały marki.
+na `site`.** Aplikacja siedzi w podkatalogu, w korzeniu repo leżą materiały
+marki.
 
 ### Podgląd przed startem (`LETFIT_PREVIEW`)
 
@@ -326,3 +423,20 @@ jest indeksowana.
 Wartość jest odczytywana **przy budowaniu** (strona jest statyczna), więc
 zmiana w panelu działa dopiero po nowym deployu. Przed uruchomieniem letfit.pl
 zmienną trzeba skasować i przebudować. Kod: `src/lib/preview.ts`.
+
+## Czego nie ruszać i co jest martwe
+
+Rzeczy, które leżą w repozytorium, ale nie są częścią działającej strony:
+
+| Co | Dlaczego zostaje |
+|---|---|
+| `scripts/build-brand.mjs` | generator **wycofanego** znaku (kręgosłup w okręgu). **Nie uruchamiaj go** — nadpisuje `letfit-horizontal.png`, `icon.png` i `apple-icon.png` obowiązującego znaku. |
+| `public/brand/letfit-emblem.png`, `letfit-full.png` | pliki starego znaku, nic ich już nie używa |
+| `components/hero-figure.tsx`, `hero-animations.tsx` | odrzucone propozycje grafiki do hero; `hero-animations` zasila jeszcze roboczą stronę `/animacje` |
+| `components/stagger.tsx` | wejście etapów wizyty po kolei — zastąpione przez `process-map.tsx`, nikt tego nie importuje |
+| `public/v2.html`, `v3.html` | statyczne propozycje wyglądu, poza aplikacją Next.js |
+| `@calcom/embed-react` w `package.json` | pozostałość po porzuconym Cal.com, nic tego nie importuje |
+
+Strona `/animacje` jest robocza: niepodlinkowana z nawigacji, z zakazem
+indeksowania i **celowo tylko po polsku** — służy do wyboru grafiki, nie
+pacjentom.

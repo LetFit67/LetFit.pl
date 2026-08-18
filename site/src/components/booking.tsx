@@ -1,4 +1,7 @@
-import { booking, business } from "@/content/site";
+"use client";
+
+import { business } from "@/content/site";
+import { useT } from "@/lib/i18n";
 import { BookingForm } from "./booking-form";
 import { ButtonLink, CalendarIcon, Eyebrow, Lead, SectionHeading } from "./ui";
 
@@ -15,6 +18,8 @@ import { ButtonLink, CalendarIcon, Eyebrow, Lead, SectionHeading } from "./ui";
  * i mówi o tym wprost — patrz `BookingForm`.
  */
 export function Booking() {
+  const { booking } = useT();
+
   return (
     <section id="rezerwacja" className="bg-mist py-20 md:py-28">
       <div className="container-x">
@@ -45,11 +50,11 @@ export function Booking() {
           )}
         </div>
 
+        {/* Notka o prywatności i wyjście na telefon siedzą WEWNĄTRZ formularza,
+            w lewej kolumnie pod polami — patrz booking-form.tsx. Karta z terminem
+            jest wyższa od karty z danymi, więc pod danymi zostawała pusta
+            kolumna; te dwa bloki ją domykają. */}
         <BookingForm />
-
-        {booking.privacyNote && (
-          <p className="mt-6 max-w-2xl text-sm text-ink-40">{booking.privacyNote}</p>
-        )}
       </div>
     </section>
   );

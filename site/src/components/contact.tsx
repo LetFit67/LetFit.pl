@@ -1,5 +1,8 @@
-import { booking, business, contact, isTodo, telLink, waLink } from "@/content/site";
+"use client";
+
+import { bookingConfig, business, isTodo, telLink } from "@/content/site";
 import type { Location } from "@/content/site";
+import { useT } from "@/lib/i18n";
 import { AuthorCard } from "./author-card";
 import {
   ButtonLink,
@@ -13,10 +16,10 @@ import {
   PinIcon,
   SectionHeading,
   Val,
-  WhatsAppIcon,
 } from "./ui";
 
 export function Contact() {
+  const t = useT();
   const socials = Object.entries(business.social).filter(([, url]) => url);
 
   return (
@@ -24,34 +27,23 @@ export function Contact() {
       <div className="container-x">
         <div className="grid gap-14 lg:grid-cols-[1fr_1fr] lg:gap-20">
           <div>
-            <Eyebrow onDark>{contact.eyebrow}</Eyebrow>
-            <SectionHeading>{contact.heading}</SectionHeading>
+            <Eyebrow onDark>{t.contact.eyebrow}</Eyebrow>
+            <SectionHeading>{t.contact.heading}</SectionHeading>
             <p className="mt-5 max-w-md text-lg leading-relaxed text-paper/70">
-              {contact.lead}
+              {t.contact.lead}
             </p>
 
             <div className="mt-9 flex flex-wrap gap-3 empty:mt-0">
-              {booking.enabled && (
+              {bookingConfig.enabled && (
                 <ButtonLink href="#rezerwacja" variant="accent">
                   <CalendarIcon />
-                  Wybierz termin
+                  {t.ui.pickSlot}
                 </ButtonLink>
               )}
               {telLink && (
                 <ButtonLink href={telLink} variant="ghost-dark">
                   <PhoneIcon />
-                  Zadzwoń
-                </ButtonLink>
-              )}
-              {waLink && (
-                <ButtonLink
-                  href={waLink}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  variant="ghost-dark"
-                >
-                  <WhatsAppIcon />
-                  WhatsApp
+                  {t.ui.call}
                 </ButtonLink>
               )}
             </div>
@@ -59,7 +51,7 @@ export function Contact() {
             {socials.length > 0 && (
               <div className="mt-10 border-t border-paper/15 pt-6">
                 <p className="text-xs tracking-[0.18em] text-paper/45 uppercase">
-                  Znajdziesz mnie też tu
+                  {t.ui.findMeHere}
                 </p>
                 <div className="mt-3 flex gap-5">
                   {socials.map(([name, url]) => (
@@ -80,7 +72,7 @@ export function Contact() {
 
           <div className="rounded-card border border-paper/15 bg-paper/[0.04] p-8 md:p-10">
             <dl className="space-y-7">
-              <Row icon={<PhoneIcon className="size-5" />} label="Telefon">
+              <Row icon={<PhoneIcon className="size-5" />} label={t.ui.phone}>
                 {telLink ? (
                   <a href={telLink} className="hover:text-blue-bright">
                     {business.phoneDisplay}
@@ -90,7 +82,7 @@ export function Contact() {
                 )}
               </Row>
 
-              <Row icon={<MailIcon className="size-5" />} label="E-mail">
+              <Row icon={<MailIcon className="size-5" />} label={t.ui.email}>
                 {/* Adres jest klikalny tak samo jak telefon — dopóki jest
                     prawdziwy. Znacznik [UZUPEŁNIJ] nie może zostać odnośnikiem,
                     bo `mailto:` z placeholderem otwiera pustą wiadomość. */}
@@ -108,26 +100,24 @@ export function Contact() {
 
               <Row
                 icon={<HomeIcon className="size-5" />}
-                label={business.homeVisits.label}
+                label={t.homeVisits.label}
               >
                 <p className="text-[15px] leading-relaxed text-paper/80">
-                  {business.homeVisits.detail}
+                  {t.homeVisits.detail}
                 </p>
               </Row>
             </dl>
           </div>
         </div>
 
-        {/* Dwie lokalizacje — każda z własnym kanałem rezerwacji, żeby pacjent
-            nie umówił się pod złym adresem. */}
         {business.locations.length > 0 && (
           /* `items-start` zamiast rozciągania na równą wysokość: kartę w Markach
-             wydłuża osadzona mapa, a bez tego karta Kliniki Sosnowej dostawała
-             kilkaset pikseli pustego dna. Lepiej dwie karty różnej wysokości niż
-             jedna do połowy pusta. */
+             wydłuża osadzona mapa, a bez tego druga karta dostawałaby kilkaset
+             pikseli pustego dna. Lepiej dwie karty różnej wysokości niż jedna
+             do połowy pusta. */
           <div className="mt-14 grid items-start gap-6 border-t border-paper/15 pt-14 md:grid-cols-2">
             {business.locations.map((loc) => (
-              <LocationCard key={`${loc.street}-${loc.city}`} location={loc} />
+              <LocationCard key={loc.id} location={loc} />
             ))}
           </div>
         )}
@@ -137,34 +127,46 @@ export function Contact() {
 }
 
 function LocationCard({ location }: { location: Location }) {
+  const t = useT();
+  /* Nazwa, etykieta, podpowiedź i godziny są tłumaczone i leżą pod `id`.
+     Lokalizacja dopisana do site.ts bez wpisu w słowniku ma pokazać sam adres
+     i mapę, a nie wywrócić stronę: dane są ważniejsze niż podpis nad nimi. */
+  const text = t.locations[location.id] ?? {
+    name: "",
+    badge: "",
+    hint: "",
+    hours: [],
+    bookingLabel: "",
+  };
+
   return (
     <article className="flex flex-col rounded-card border border-paper/15 p-8">
       <div className="flex items-start gap-4">
         <PinIcon className="mt-1 size-5 shrink-0 text-blue-bright" />
         <div className="min-w-0 flex-1">
-          {location.badge && (
+          {text.badge && (
             <p className="text-xs tracking-[0.18em] text-paper/45 uppercase">
-              {location.badge}
+              {text.badge}
             </p>
           )}
-          {location.name && (
-            <p className="mt-1.5 font-display text-lg font-semibold">{location.name}</p>
+          {text.name && (
+            <p className="mt-1.5 font-display text-lg font-semibold">{text.name}</p>
           )}
-          <p className={location.name ? "mt-1" : "mt-1.5"}>
+          <p className={text.name ? "mt-1" : "mt-1.5"}>
             <Val>{location.street}</Val>
           </p>
           <p>
             <Val>{location.postalCode}</Val> <Val>{location.city}</Val>
           </p>
-          {location.hint && <p className="mt-2 text-sm text-paper/50">{location.hint}</p>}
+          {text.hint && <p className="mt-2 text-sm text-paper/50">{text.hint}</p>}
         </div>
       </div>
 
-      {location.hours.length > 0 && (
+      {text.hours.length > 0 && (
         <div className="mt-6 flex items-start gap-4 border-t border-paper/10 pt-5">
           <ClockIcon className="mt-1 size-5 shrink-0 text-blue-bright" />
           <ul className="min-w-0 flex-1 space-y-1.5 text-[15px]">
-            {location.hours.map((h) => (
+            {text.hours.map((h) => (
               <li key={h.day} className="flex flex-wrap justify-between gap-x-6">
                 <span className="text-paper/70">{h.day}</span>
                 <span className="font-semibold">
@@ -184,7 +186,7 @@ function LocationCard({ location }: { location: Location }) {
             rel="noopener noreferrer"
             className="text-sm font-semibold text-blue-bright underline-offset-4 hover:underline"
           >
-            Nawiguj →
+            {t.ui.navigate} →
           </a>
         )}
         {location.bookingUrl ? (
@@ -194,15 +196,15 @@ function LocationCard({ location }: { location: Location }) {
             rel="noopener noreferrer"
             className="text-sm font-semibold text-blue-bright underline-offset-4 hover:underline"
           >
-            {location.bookingLabel || "Rezerwuj"} →
+            {text.bookingLabel || t.ui.bookHere} →
           </a>
         ) : (
-          booking.enabled && (
+          bookingConfig.enabled && (
             <a
               href="#rezerwacja"
               className="text-sm font-semibold text-blue-bright underline-offset-4 hover:underline"
             >
-              Wybierz termin →
+              {t.ui.pickSlot} →
             </a>
           )
         )}
@@ -212,7 +214,7 @@ function LocationCard({ location }: { location: Location }) {
         <div className="mt-6 overflow-hidden rounded-card border border-paper/15">
           <iframe
             src={location.mapsEmbedUrl}
-            title={`Mapa dojazdu: ${location.city}, ${location.street}`}
+            title={t.ui.mapTitle(location.city, location.street)}
             loading="lazy"
             referrerPolicy="no-referrer-when-downgrade"
             allowFullScreen
@@ -251,6 +253,7 @@ function Row({
 /* ------------------------------------------------------------------ */
 
 export function Footer() {
+  const t = useT();
   const year = new Date().getFullYear();
 
   return (
@@ -259,7 +262,8 @@ export function Footer() {
         <div>
           <Logo variant="horizontal" className="h-12 w-auto" />
           <p className="mt-4 text-sm text-ink-40">
-            <Val>{business.legal.companyName}</Val> · NIP <Val>{business.legal.nip}</Val>
+            <Val>{business.legal.companyName}</Val> · {t.ui.taxId}{" "}
+            <Val>{business.legal.nip}</Val>
           </p>
         </div>
 
@@ -268,7 +272,7 @@ export function Footer() {
             href="/polityka-prywatnosci"
             className="font-medium text-ink-60 hover:text-ink"
           >
-            Polityka prywatności
+            {t.ui.privacyPolicy}
           </a>
           <p className="mt-2">
             © {year} {business.brand} · {business.person}
@@ -277,7 +281,7 @@ export function Footer() {
           {/* Podpis wykonawcy — kafelek z rozwijanymi szczegółami. */}
           <div className="mt-5 flex flex-col items-start gap-2 sm:items-end">
             <p className="text-xs tracking-[0.18em] text-ink-40 uppercase">
-              Strona stworzona przez
+              {t.ui.madeBy}
             </p>
             <AuthorCard />
           </div>
@@ -292,13 +296,13 @@ export function Footer() {
 /* ------------------------------------------------------------------ */
 
 export function MobileCtaBar() {
-  const secondary = booking.enabled
-    ? { href: "#rezerwacja", label: "Wybierz termin", external: false }
+  const t = useT();
+
+  const secondary = bookingConfig.enabled
+    ? { href: "#rezerwacja", label: t.ui.pickSlot, external: false }
     : business.booksyUrl
       ? { href: business.booksyUrl, label: "Booksy", external: true }
-      : waLink
-        ? { href: waLink, label: "WhatsApp", external: true }
-        : null;
+      : null;
 
   if (!telLink && !secondary) return null;
 
@@ -308,7 +312,7 @@ export function MobileCtaBar() {
         {telLink && (
           <ButtonLink href={telLink} className="flex-1 px-4 py-3">
             <PhoneIcon />
-            Zadzwoń
+            {t.ui.call}
           </ButtonLink>
         )}
         {secondary && (
