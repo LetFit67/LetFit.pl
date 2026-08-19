@@ -63,13 +63,13 @@ niezależnie od tego, w którym języku ktoś ją zobaczy.
 
 ### Co zostało do uzupełnienia
 
-Dane kontaktowe, cennik, adres i opinie są już prawdziwe. Zostały trzy rzeczy:
+Dane kontaktowe, cennik, adres, godziny i opinie są już prawdziwe, a polityka
+prywatności została przejrzana przed publikacją. **Na stronie nie ma ani jednego
+widocznego znacznika `[UZUPEŁNIJ]`.** Została jedna rzecz:
 
-| Gdzie | Czego brakuje |
+| Gdzie | Co jest nie tak |
 |---|---|
-| `privacy.recipientsTodo` w słownikach | konkretna lista odbiorców danych w polityce prywatności — jedyny `[UZUPEŁNIJ]`, który realnie widać na stronie |
-| `bookingConfig.schedule` w `site.ts` | godziny 8:00–20:00 są punktem wyjścia, nie ustaleniem — **czekają na potwierdzenie od Mikołaja** |
-| `public/brand/clubs/kadra-polski.png` | plik pochodzi ze stocka i ma wtopiony znak wodny „pngtree" — do podmiany przed publikacją |
+| `public/brand/clubs/kadra-polski.png` | plik pochodzi ze stocka i ma wtopiony znak wodny „pngtree", widoczny w pasku współpracy — do podmiany na czystą grafikę |
 
 Puste tablice ukrywają całe sekcje i tak ma zostać, dopóki nie ma czym ich
 wypełnić: `about.credentials` (wykształcenie i kursy) oraz `portfolio.items`
@@ -383,9 +383,16 @@ słowników. Wersja angielska jest tłumaczeniem tego samego dokumentu, nie osob
 polityką — podstawy prawne (RODO, przepisy o dokumentacji medycznej) są
 identyczne.
 
-**To nie jest porada prawna.** Przejrzyj treść, dopasuj do rzeczywistego
-sposobu przetwarzania danych i usuń błękitną ramkę ostrzegawczą na górze
-(pole `privacy.draftNotice` — puste ukrywa ramkę).
+Treść została przejrzana przed publikacją (sierpień 2026) i błękitna ramka
+robocza jest zdjęta: `privacy.draftNotice` jest puste, a puste pole ukrywa ramkę.
+Gdyby polityka wymagała kiedyś ponownego przeglądu, wystarczy wpisać notkę
+z powrotem.
+
+**To nadal nie jest porada prawna.** Przy każdej zmianie w sposobie
+przetwarzania danych — nowy program do dokumentacji, biuro rachunkowe, system
+rezerwacji — trzeba rozszerzyć sekcję o odbiorcach, ZANIM zaczną przetwarzać
+dane. Dziś nie ma tam żadnego podmiotu trzeciego: zostają wyłącznie dostawca
+poczty i dostawca hostingu, podani jako kategorie.
 
 Podstrona ma `robots: { index: false, follow: true }` i jest wyłączona
 w `robots.txt`.

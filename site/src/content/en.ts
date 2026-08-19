@@ -758,11 +758,7 @@ export const en: Content = {
     metaDescription:
       "Information on the processing of personal data by the LETFIT physiotherapy practice.",
     draftTitle: "To be reviewed before publication.",
-    draftNotice:
-      "This is a skeleton based on the usual obligations of a physiotherapy practice " +
-      "(GDPR plus medical records law). It is not legal advice. Before publishing the " +
-      "site, read it through and match it to how you actually process data. Remove this " +
-      "box when you are done.",
+    draftNotice: "",
 
     controllerHeading: "Data controller",
     controllerIntro: "The controller of your personal data is",

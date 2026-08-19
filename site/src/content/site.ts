@@ -202,8 +202,8 @@ export const bookingConfig = {
   /**
    * Grafik, z którego kalendarzyk buduje dostępne dni i godziny.
    *
-   * Soboty są przyjmowane (decyzja Mikołaja, sierpień 2026).
-   * GODZINY 8:00–20:00 NADAL DO POTWIERDZENIA — to punkt wyjścia, nie ustalenie.
+   * Soboty są przyjmowane, godziny 8:00–20:00 potwierdzone przez Mikołaja
+   * (sierpień 2026). To ustalenie, nie punkt wyjścia.
    */
   schedule: {
     /** Dni pracy wg `Date.getDay()`: 1 = poniedziałek … 6 = sobota. */

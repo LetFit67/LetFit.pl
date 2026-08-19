@@ -379,7 +379,19 @@ function Rating({
     /* Ocena jest pierwszą rzeczą w karcie i ma taką wagę — gwiazdki są
        wyraźnie większe od pisma, a liczba idzie obok nich jak wynik. */
     <div className="flex items-center justify-center gap-3.5">
-      <div className="flex items-center gap-2">
+      {/*
+        `relative` NIE jest tu ozdobą.
+
+        `sr-only` ustawia `position: absolute`. Bez pozycjonowanego przodka
+        blokiem zawierającym takiego elementu jest cały dokument, więc podpis
+        NIE JEST przycinany przez pas z opiniami: ląduje w bezwzględnych
+        współrzędnych daleko poza ekranem i rozciąga stronę na kilka tysięcy
+        pikseli, dając poziomy pasek przewijania przy całym dokumencie.
+
+        Po potrojeniu listy na potrzeby pętli podpisy odjeżdżały trzy razy
+        dalej niż wcześniej, więc problem stał się dobrze widoczny.
+      */}
+      <div className="relative flex items-center gap-2">
         <span className="sr-only">{t.ui.ratingOf(value)}</span>
 
         {Array.from({ length: 5 }, (_, s) => (

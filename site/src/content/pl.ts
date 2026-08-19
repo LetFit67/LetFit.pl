@@ -881,13 +881,15 @@ export const pl = {
     title: "Polityka prywatności",
     metaDescription:
       "Informacja o przetwarzaniu danych osobowych przez gabinet fizjoterapii LETFIT.",
-    /** Ramka robocza. Puste `draftNotice` = ramka znika ze strony. */
+    /**
+     * Ramka robocza. Puste `draftNotice` = ramka znika ze strony.
+     *
+     * ZDJĘTA W SIERPNIU 2026: Mikołaj przejrzał treść przed publikacją.
+     * Tekst zostaje w `draftTitle` na wypadek, gdyby polityka wymagała
+     * kiedyś ponownego przeglądu — wtedy wystarczy wpisać z powrotem notkę.
+     */
     draftTitle: "Do weryfikacji przed publikacją.",
-    draftNotice:
-      "To szkielet oparty na typowych obowiązkach gabinetu fizjoterapii (RODO " +
-      "+ dokumentacja medyczna). Nie jest to porada prawna. Przed opublikowaniem " +
-      "strony przejrzyj go i dopasuj do tego, jak faktycznie przetwarzasz dane. " +
-      "Usuń tę ramkę, gdy skończysz.",
+    draftNotice: "",
 
     controllerHeading: "Administrator danych",
     controllerIntro: "Administratorem twoich danych osobowych jest",
