@@ -1,0 +1,41 @@
+<!--
+  Flaga Polski w kadrze okrągłym, rysowana od zera.
+
+  Zastąpiła plik ze stocka, który miał wtopiony znak wodny „pngtree" widoczny
+  w pasku współpracy. Flaga państwowa nie jest niczyim znakiem towarowym,
+  więc nie ma powodu brać jej z cudzej grafiki: to dwa prostokąty.
+
+  Czerwień #D61E3D to RGB 214/30/61 z rządowej specyfikacji barw. Biała
+  połowa zlewałaby się z tłem strony (#FBFCFE), dlatego wewnątrz koła biegnie
+  cienka granatowa obwódka o niskim kryciu — bez niej przy 36 px widać by
+  było samą czerwień.
+
+  Kształt jest kołem, bo taki jest znacznik w pasku (shape: "circle").
+-->
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  viewBox="0 0 1200 1200"
+  width="1200"
+  height="1200"
+>
+  <defs>
+    <clipPath id="kadra-kolo">
+      <circle cx="600" cy="600" r="600" />
+    </clipPath>
+  </defs>
+
+  <g clip-path="url(#kadra-kolo)">
+    <rect width="1200" height="600" fill="#ffffff" />
+    <rect y="600" width="1200" height="600" fill="#d61e3d" />
+  </g>
+
+  <circle
+    cx="600"
+    cy="600"
+    r="588"
+    fill="none"
+    stroke="#0a1433"
+    stroke-opacity="0.14"
+    stroke-width="24"
+  />
+</svg>

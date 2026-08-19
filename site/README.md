@@ -63,13 +63,15 @@ niezależnie od tego, w którym języku ktoś ją zobaczy.
 
 ### Co zostało do uzupełnienia
 
-Dane kontaktowe, cennik, adres, godziny i opinie są już prawdziwe, a polityka
-prywatności została przejrzana przed publikacją. **Na stronie nie ma ani jednego
-widocznego znacznika `[UZUPEŁNIJ]`.** Została jedna rzecz:
+Dane kontaktowe, cennik, adres, godziny i opinie są już prawdziwe, polityka
+prywatności została przejrzana przed publikacją, a znak wodny z paska współpracy
+zniknął. **Na stronie nie ma ani jednego widocznego znacznika `[UZUPEŁNIJ]`
+i nic nie czeka na uzupełnienie.**
 
-| Gdzie | Co jest nie tak |
-|---|---|
-| `public/brand/clubs/kadra-polski.png` | plik pochodzi ze stocka i ma wtopiony znak wodny „pngtree", widoczny w pasku współpracy — do podmiany na czystą grafikę |
+Zostają dwa pliki źródłowe, których strona nie używa: `301221533_….png`
+i `528285799_….jpg` w `public/brand/clubs/` to oryginały pobrane z profili
+klubów, z których powstały `markowi-biegacze.png` i `sparta-marki.jpg`.
+Warto potwierdzić, że jest zgoda klubów na publikację ich znaków.
 
 Puste tablice ukrywają całe sekcje i tak ma zostać, dopóki nie ma czym ich
 wypełnić: `about.credentials` (wykształcenie i kursy) oraz `portfolio.items`

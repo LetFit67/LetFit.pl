@@ -235,9 +235,9 @@ export const bookingConfig = {
  * masz zgodę — pobrane z profilu klubu „bo są publiczne" to za mało.
  *
  * Format: PNG lub SVG z przezroczystym tłem, wysokość co najmniej 120 px.
- * Pasek i tak sprowadza je do skali szarości i wtapia w tło, więc kolor pliku
- * nie ma znaczenia, ale przezroczystość ma — logo na białym prostokącie
- * będzie widać jako łatę.
+ * Znaczki idą w kolorze, z lekko obniżonym kryciem, które wraca do pełnego
+ * po najechaniu na pasek. Przezroczystość ma znaczenie: logo na białym
+ * prostokącie będzie widać jako łatę na tle znaczka.
  *
  * Nazwy leżą w słownikach pod kluczem `id`: dwie pierwsze pozycje to nazwy
  * własne klubów i brzmią tak samo w obu językach, trzecia jest opisem.
@@ -267,10 +267,10 @@ export const collaborationLogos: {
     id: "kadra-polski",
     shape: "circle",
     initials: "PL",
-    /* UWAGA: plik pochodzi ze stocka i ma wtopiony znak wodny „pngtree".
-       Widać go na stronie i jest to cudzy znak — do podmiany na czystą
-       grafikę flagi, zanim strona pójdzie na produkcję. */
-    logo: "/brand/clubs/kadra-polski.png",
+    /* Flaga narysowana od zera (SVG), nie wzięta ze stocka — poprzedni plik
+       miał wtopiony znak wodny „pngtree", widoczny na stronie. Flaga
+       państwowa nie jest niczyim znakiem, więc nie ma czego licencjonować. */
+    logo: "/brand/clubs/kadra-polski.svg",
   },
 ];
 
