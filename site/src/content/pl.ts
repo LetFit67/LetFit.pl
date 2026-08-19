@@ -926,13 +926,31 @@ export const pl = {
       "potrzebne.",
 
     recipientsHeading: "Komu przekazuję dane",
+    /**
+     * Stan faktyczny na sierpień 2026, potwierdzony przez Mikołaja: NIE MA
+     * żadnych podmiotów trzecich. Nie ma systemu rezerwacji, biura rachunkowego
+     * z wglądem w dokumentację ani zewnętrznego oprogramowania do terapii.
+     *
+     * Zostają dwie usługi techniczne, których nie da się pominąć: poczta,
+     * na którą przychodzi zgłoszenie, i hosting, który widzi logi serwera.
+     * Podane jako KATEGORIE, nie z nazwy: RODO na to pozwala, a nazwa firmy
+     * i tak zmieni się przy przejściu na własną domenę.
+     *
+     * Gdyby doszło biuro rachunkowe albo program do dokumentacji medycznej,
+     * ten akapit trzeba rozszerzyć, zanim zaczną przetwarzać dane.
+     */
     recipients:
-      "Wyłącznie podmiotom, które są niezbędne do prowadzenia gabinetu: dostawcy " +
-      "systemu rezerwacji, biuro rachunkowe, dostawca hostingu i poczty. Każdy z nich " +
-      "działa na podstawie umowy powierzenia albo własnego obowiązku prawnego. Danych " +
-      "nie sprzedaję i nie przekazuję do celów marketingowych podmiotom trzecim.",
-    recipientsTodo:
-      "[UZUPEŁNIJ: wypisz konkretnych odbiorców, np. Booksy, biuro rachunkowe, dostawca hostingu]",
+      "Nie przekazuję twoich danych podmiotom trzecim. Nie korzystam z systemu " +
+      "rezerwacji, nie prowadzę dokumentacji w zewnętrznym oprogramowaniu i nie " +
+      "udostępniam danych biuru rachunkowemu. Danych nie sprzedaję i nie przekazuję " +
+      "do celów marketingowych.",
+    recipientsInfra:
+      "Z konieczności technicznej dostęp do części danych mają dwie usługi, bez " +
+      "których strona i poczta nie działają: dostawca skrzynki, na którą przychodzi " +
+      "twoje zgłoszenie, oraz dostawca hostingu tej strony, którego serwer zapisuje " +
+      "adresy IP odwiedzających. Nie zaglądam w te dane poza obsługą zgłoszeń.",
+    /** Puste = ramka ze znacznikiem [UZUPEŁNIJ] w ogóle się nie renderuje. */
+    recipientsTodo: "",
 
     rightsHeading: "Twoje prawa",
     rights:

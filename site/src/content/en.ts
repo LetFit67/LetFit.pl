@@ -800,12 +800,15 @@ export const en: Content = {
 
     recipientsHeading: "Who I share the data with",
     recipients:
-      "Only with parties necessary to run the practice: the booking system provider, the " +
-      "accounting office, the hosting and mail provider. Each of them acts under a data " +
-      "processing agreement or its own legal obligation. I do not sell the data and I do " +
-      "not pass it to third parties for marketing.",
-    recipientsTodo:
-      "[UZUPEŁNIJ: wypisz konkretnych odbiorców, np. Booksy, biuro rachunkowe, dostawca hostingu]",
+      "I do not pass your data to third parties. I use no booking system, I keep no " +
+      "records in external software and I share nothing with an accounting office. " +
+      "I do not sell the data and I do not pass it on for marketing.",
+    recipientsInfra:
+      "Out of technical necessity, two services can reach part of the data, because " +
+      "without them neither this site nor e-mail works: the provider of the mailbox " +
+      "your request arrives in, and the provider hosting this site, whose server logs " +
+      "visitors' IP addresses. I do not look into that data beyond handling requests.",
+    recipientsTodo: "",
 
     rightsHeading: "Your rights",
     rights:

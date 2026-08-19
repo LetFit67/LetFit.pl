@@ -88,9 +88,14 @@ function PrivacyBody() {
           <section>
             <h2>{p.recipientsHeading}</h2>
             <p>{p.recipients}</p>
-            <p className="rounded-lg bg-mist-dim p-4">
-              <Val>{p.recipientsTodo}</Val>
-            </p>
+            <p>{p.recipientsInfra}</p>
+            {/* Ramka na znacznik [UZUPEŁNIJ] renderuje się tylko wtedy, gdy jest
+                co uzupełnić. Pusty tekst = sekcja jest kompletna. */}
+            {p.recipientsTodo && (
+              <p className="rounded-lg bg-mist-dim p-4">
+                <Val>{p.recipientsTodo}</Val>
+              </p>
+            )}
           </section>
 
           <section>
