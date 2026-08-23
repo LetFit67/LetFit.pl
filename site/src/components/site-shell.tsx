@@ -4,6 +4,7 @@ import { LocaleProvider, useT, type PageTitle } from "@/lib/i18n";
 import { Contact, Footer, MobileCtaBar } from "./contact";
 import { Header } from "./header";
 import { Booking } from "./booking";
+import { Certificates } from "./certificates-rail";
 import { Collaborations, Hero } from "./hero";
 import {
   About,
@@ -52,6 +53,9 @@ export function SiteShell() {
         <Equipment />
         <Process />
         <About />
+        {/* Certyfikaty zaraz po „O mnie": to rozwinięcie tego, kim jest ten
+            człowiek, więc czyta się je od razu po jego opisie. */}
+        <Certificates />
         <Portfolio />
         <Pricing />
         <Faq />

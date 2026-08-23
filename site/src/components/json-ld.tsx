@@ -1,5 +1,5 @@
 import { pl } from "@/content/pl";
-import { business, isTodo, siteUrl } from "@/content/site";
+import { business, certificates, isTodo, siteUrl } from "@/content/site";
 
 /**
  * Dane strukturalne dla wyszukiwarek.
@@ -76,11 +76,24 @@ export function JsonLd() {
       ...Object.values(business.social).filter(Boolean),
       business.booksyUrl,
     ].filter(Boolean),
-    founder: {
+    founder: clean({
       "@type": "Person",
       name: business.person,
       jobTitle: pl.about.role,
-    },
+      /* Kursy jako poświadczenia zawodowe. Zawsze po polsku, jak reszta tego
+         pliku: robot i tak dostaje z serwera wyłącznie wersję polską. */
+      hasCredential: certificates.length
+        ? certificates.map((c) =>
+            clean({
+              "@type": "EducationalOccupationalCredential",
+              name: pl.certificates.names[c.id] || c.id,
+              credentialCategory: "certificate",
+              dateCreated: c.year,
+              recognizedBy: { "@type": "Organization", name: c.issuer },
+            })
+          )
+        : undefined,
+    }),
     makesOffer: pl.services.items.map((s) => ({
       "@type": "Offer",
       itemOffered: { "@type": "Service", name: s.title, description: s.summary },

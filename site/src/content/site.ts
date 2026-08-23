@@ -146,6 +146,48 @@ export const photos = {
 };
 
 /* ------------------------------------------------------------------ */
+/* CERTYFIKATY                                                         */
+/* ------------------------------------------------------------------ */
+
+/**
+ * Skany certyfikatów Mikołaja, przepisane ze zdjęć w `media/Certyfikaty`.
+ *
+ * Pliki JPG generuje `scripts/build-certificates.mjs` prosto z tamtych PDF-ów.
+ * Nie podmieniaj ich ręcznie: skrypt prostuje obrót i skaluje je do rozmiaru
+ * webowego, a `id` musi zgadzać się z nazwą pliku i z kluczem w słownikach.
+ *
+ * WYMIARY SĄ TU NIEPRZYPADKOWO. Kafle w pasku mają wspólną wysokość i naturalną
+ * szerokość, więc `next/image` musi znać proporcję każdego pliku z góry,
+ * inaczej układ przeskakiwałby po doczytaniu obrazków. Dziewięć certyfikatów
+ * jest poziomych, jeden (masaż tkanek głębokich) pionowy — dlatego nie da się
+ * podać jednej proporcji dla wszystkich.
+ *
+ * Kolejność jest od najbliższych fizjoterapii do najdalszych: pacjent ma
+ * najpierw zobaczyć to, co dotyczy jego wizyty.
+ *
+ * `issuer` to nazwa własna organizatora i brzmi tak samo w obu językach,
+ * dlatego stoi tutaj, a nie w słownikach. Tytuły kursów leżą w słownikach.
+ */
+export const certificates: {
+  id: string;
+  issuer: string;
+  year: string;
+  w: number;
+  h: number;
+}[] = [
+  { id: "diagnostyka", issuer: "Rehaintegro", year: "2026", w: 1400, h: 981 },
+  { id: "igloterapia-modul-2", issuer: "Rehaintegro", year: "2026", w: 1400, h: 981 },
+  { id: "igloterapia-poziom-1", issuer: "Rehaintegro", year: "2024", w: 1400, h: 981 },
+  { id: "indiba-sport", issuer: "INDIBA Academy", year: "2026", w: 1400, h: 981 },
+  { id: "indiba-poziom-1", issuer: "INDIBA Academy", year: "2026", w: 1400, h: 981 },
+  { id: "indiba-initial", issuer: "INDIBA Academy", year: "2025", w: 1400, h: 981 },
+  { id: "masaz-tkanek-glebokich", issuer: "ISDTMP", year: "2024", w: 1400, h: 1997 },
+  { id: "instruktor-trojboju", issuer: "AKFITS", year: "2023", w: 1400, h: 981 },
+  { id: "trener-personalny", issuer: "Mauricz Training Center", year: "2020", w: 1400, h: 981 },
+  { id: "suplementacja", issuer: "Program dr. Otto Horaka", year: "2022", w: 1400, h: 981 },
+];
+
+/* ------------------------------------------------------------------ */
 /* STOPKA AUTORSKA                                                     */
 /* ------------------------------------------------------------------ */
 

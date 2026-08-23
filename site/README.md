@@ -68,10 +68,18 @@ prywatności została przejrzana przed publikacją, a znak wodny z paska współ
 zniknął. **Na stronie nie ma ani jednego widocznego znacznika `[UZUPEŁNIJ]`
 i nic nie czeka na uzupełnienie.**
 
-Zostają dwa pliki źródłowe, których strona nie używa: `301221533_….png`
-i `528285799_….jpg` w `public/brand/clubs/` to oryginały pobrane z profili
-klubów, z których powstały `markowi-biegacze.png` i `sparta-marki.jpg`.
-Warto potwierdzić, że jest zgoda klubów na publikację ich znaków.
+Do potwierdzenia zostały trzy rzeczy przy certyfikatach i znakach klubów:
+
+- **W `media/Certyfikaty` leży 10 skanów, a miało być 11.** Jeden prawdopodobnie
+  nie został dołożony.
+- **Numer prawa wykonywania zawodu (PWZ 86238) jest widoczny** na dwóch skanach
+  z Rehaintegro. To numer z publicznego rejestru Krajowej Izby Fizjoterapeutów
+  i działa na korzyść wiarygodności, ale publikacja skanu z nim to świadoma
+  decyzja Mikołaja, nie przeoczenie.
+- `301221533_….png` i `528285799_….jpg` w `public/brand/clubs/` to oryginały
+  pobrane z profili klubów, z których powstały `markowi-biegacze.png`
+  i `sparta-marki.jpg`. Herby klubów to cudze znaki — warto potwierdzić zgodę
+  na ich publikację.
 
 Puste tablice ukrywają całe sekcje i tak ma zostać, dopóki nie ma czym ich
 wypełnić: `about.credentials` (wykształcenie i kursy) oraz `portfolio.items`
@@ -216,6 +224,50 @@ Sekcja hero **nie używa zdjęcia** — jest tam klip z biegaczem
 (`components/hero-runner.tsx`, `public/video/hero-runner.mp4` z klatką
 `hero-runner.jpg` jako poster).
 
+## Certyfikaty
+
+Sekcja „Kwalifikacje" to poziomy pas przeciągany myszą
+(`components/certificates-rail.tsx`), stojący zaraz po „O mnie". Kafel jest
+odnośnikiem otwierającym pełny skan w nowej karcie.
+
+**Pas NIE jest zapętlony**, w odróżnieniu od opinii. Pętla wymaga potrojenia
+listy, a tu każda pozycja to zdjęcie: trzydzieści obrazków zamiast dziesięciu
+kosztowałoby więcej, niż warta jest wygoda przewijania w kółko.
+
+### Skąd biorą się pliki
+
+Źródłem są skany PDF w `media/Certyfikaty`. Pliki JPG na stronę generuje skrypt:
+
+```bash
+node scripts/build-certificates.mjs
+```
+
+Skrypt **nie rasteryzuje PDF-a** i nie potrzebuje do tego żadnego narzędzia.
+Każdy z tych PDF-ów jest skanem bez warstwy tekstowej: w środku siedzi jeden
+obraz zapisany filtrem `DCTDecode`, czyli gotowy strumień JPEG. Skrypt znajduje
+jego początek i koniec, przepisuje bajty, prostuje obrót i skaluje do 1400 px
+dłuższego boku. Dziesięć skanów schodzi w ten sposób z 5,5 MB do ok. 1,1 MB.
+
+**Obrót jest różny dla różnych skanów** i trzeba go sprawdzić okiem. Większość
+przyszła obrócona o 90 stopni w lewo, jeden był już prosty. Mapa `OBROTY`
+w skrypcie trzyma wyjątki.
+
+Po wyprostowaniu **dziewięć certyfikatów jest poziomych, a jeden pionowy**.
+Dlatego `certificates` w `src/content/site.ts` podaje wymiary każdego pliku:
+bez nich `next/image` nie zna proporcji przed wczytaniem i układ przeskakiwałby
+po doczytaniu obrazków.
+
+### Dopisanie kolejnego certyfikatu
+
+1. Wrzuć PDF do `media/Certyfikaty`.
+2. Dopisz go do mapy `SLUGI` w `scripts/build-certificates.mjs` i uruchom skrypt.
+3. Dopisz wpis do `certificates` w `site.ts` (slug, organizator, rok, wymiary
+   z tabelki wypisanej przez skrypt).
+4. Dopisz tytuł do `certificates.names` w `pl.ts` **oraz** `en.ts`.
+
+Sekcja **nie ma pozycji w menu** — pasek nawigacji jest pełny, szczegóły
+w rozdziale o nagłówku.
+
 ## Marka
 
 Obowiązujący znak to piktogram biegacza z błękitnym łukiem. Pliki na stronę
@@ -352,6 +404,7 @@ src/
     hover-reveal.tsx            rozwijanie <details> po najechaniu
     booking.tsx                 sekcja zgłoszenia
     booking-form.tsx            formularz + kalendarzyk grafiku
+    certificates-rail.tsx       pas z certyfikatami
     contact.tsx                 kontakt, lokalizacja, stopka, pasek CTA mobile
     author-card.tsx             podpis wykonawcy w stopce
     json-ld.tsx                 dane strukturalne (zawsze po polsku, serwer)

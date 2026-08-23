@@ -461,6 +461,34 @@ export const en: Content = {
   },
 
   /* ---------------------------------------------------------------- */
+  /* CERTIFICATES                                                      */
+  /* ---------------------------------------------------------------- */
+
+  certificates: {
+    eyebrow: "Qualifications",
+    heading: "Courses I have completed",
+    lead:
+      "You can open and read every certificate. The professional licence number " +
+      "shown on some of them can be checked in the register of the Polish " +
+      "Chamber of Physiotherapists.",
+    dragHint: "drag to scroll",
+    open: (nazwa: string) => `Open certificate: ${nazwa}`,
+    names: {
+      diagnostyka: "Diagnostics and clinical reasoning",
+      "igloterapia-modul-2":
+        "Dry Needling and intramuscular electrical stimulation (IMES), module II",
+      "igloterapia-poziom-1": "Dry Needling, level 1",
+      "indiba-sport": "INDIBA activ Cell Therapy, Sport & Activ Fit",
+      "indiba-poziom-1": "INDIBA activ Cell Therapy, level 1",
+      "indiba-initial": "INDIBA activ Cell Therapy, initial training",
+      "masaz-tkanek-glebokich": "Deep Tissue Massage and Myofascial Release",
+      "instruktor-trojboju": "Powerlifting instructor",
+      "trener-personalny": "Personal trainer",
+      suplementacja: "Health consultant",
+    },
+  },
+
+  /* ---------------------------------------------------------------- */
   /* TRANSFORMATIONS                                                   */
   /* ---------------------------------------------------------------- */
 

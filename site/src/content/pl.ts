@@ -528,6 +528,43 @@ export const pl = {
   },
 
   /* ---------------------------------------------------------------- */
+  /* CERTYFIKATY                                                       */
+  /* ---------------------------------------------------------------- */
+
+  /**
+   * Tytuły przepisane ze skanów, słowo w słowo. Klucze odpowiadają
+   * `certificates[].id` w site.ts.
+   *
+   * Nazwy metod i marek (INDIBA, Dry Needling, IMES) zostają w oryginale
+   * także w wersji angielskiej — to nazwy własne, nie do tłumaczenia.
+   */
+  certificates: {
+    eyebrow: "Kwalifikacje",
+    heading: "Kursy, które ukończyłem",
+    lead:
+      "Każdy certyfikat możesz otworzyć i przeczytać. Numer prawa wykonywania " +
+      "zawodu widoczny na części z nich sprawdzisz w rejestrze Krajowej Izby " +
+      "Fizjoterapeutów.",
+    dragHint: "przeciągnij, aby przewinąć",
+    /** Podpowiedź dla czytnika ekranu przy kaflu otwierającym skan. */
+    open: (nazwa: string) => `Otwórz certyfikat: ${nazwa}`,
+    names: {
+      diagnostyka: "Diagnostyka z wnioskowaniem klinicznym",
+      "igloterapia-modul-2":
+        "Suche igłowanie (DN) i śródmięśniowa stymulacja elektryczna (IMES), moduł II",
+      "igloterapia-poziom-1": "Suche igłowanie (Dry Needling), poziom 1",
+      "indiba-sport": "INDIBA activ Cell Therapy, Sport & Activ Fit",
+      "indiba-poziom-1": "INDIBA activ Cell Therapy, poziom 1",
+      "indiba-initial": "INDIBA activ Cell Therapy, szkolenie wstępne",
+      "masaz-tkanek-glebokich":
+        "Masaż tkanek głębokich i rozluźnianie mięśniowo-powięziowe",
+      "instruktor-trojboju": "Instruktor trójboju siłowego",
+      "trener-personalny": "Trener personalny",
+      suplementacja: "Konsultant do spraw zdrowia",
+    } as Record<string, string>,
+  },
+
+  /* ---------------------------------------------------------------- */
   /* METAMORFOZY / PORTFOLIO                                           */
   /* ---------------------------------------------------------------- */
 
