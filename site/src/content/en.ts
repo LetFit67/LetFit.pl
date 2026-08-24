@@ -466,13 +466,15 @@ export const en: Content = {
 
   certificates: {
     eyebrow: "Qualifications",
-    heading: "Courses I have completed",
+    heading: "Professional certification",
     lead:
       "You can open and read every certificate. The professional licence number " +
       "shown on some of them can be checked in the register of the Polish " +
       "Chamber of Physiotherapists.",
     dragHint: "drag to scroll",
     open: (nazwa: string) => `Open certificate: ${nazwa}`,
+    close: "Close certificate preview",
+    scrollbar: "Scroll the certificate list",
     names: {
       diagnostyka: "Diagnostics and clinical reasoning",
       "igloterapia-modul-2":

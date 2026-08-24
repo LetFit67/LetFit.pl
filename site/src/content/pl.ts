@@ -540,7 +540,7 @@ export const pl = {
    */
   certificates: {
     eyebrow: "Kwalifikacje",
-    heading: "Kursy, które ukończyłem",
+    heading: "Certyfikacja zawodowa",
     lead:
       "Każdy certyfikat możesz otworzyć i przeczytać. Numer prawa wykonywania " +
       "zawodu widoczny na części z nich sprawdzisz w rejestrze Krajowej Izby " +
@@ -548,6 +548,10 @@ export const pl = {
     dragHint: "przeciągnij, aby przewinąć",
     /** Podpowiedź dla czytnika ekranu przy kaflu otwierającym skan. */
     open: (nazwa: string) => `Otwórz certyfikat: ${nazwa}`,
+    /** Krzyżyk gaszący nakładkę z powiększonym skanem. */
+    close: "Zamknij podgląd certyfikatu",
+    /** Suwak pod pasem: dla czytnika ekranu to zwykły pasek przewijania. */
+    scrollbar: "Przewiń listę certyfikatów",
     names: {
       diagnostyka: "Diagnostyka z wnioskowaniem klinicznym",
       "igloterapia-modul-2":
