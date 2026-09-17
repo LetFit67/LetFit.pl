@@ -250,7 +250,13 @@
   display: flex;
   align-items: center;
   width: max-content;
-  animation: marquee 38s linear infinite;
+  /*
+    Czas przejazdu JEDNEJ kopii listy. Mniejsza liczba to szybszy przesuw;
+    `linear` zostaje, bo każde złagodzenie na krańcach dawałoby szarpnięcie
+    w miejscu zapętlenia. 26 s zamiast wcześniejszych 38 s: nazwy idą
+    wyraźnie żwawiej, a wciąż da się je przeczytać bez pośpiechu.
+  */
+  animation: marquee 26s linear infinite;
 }
 
 @keyframes marquee {
@@ -273,13 +279,25 @@
   krawędzi kontenera. Maska sprawia, że po prostu gasną.
 */
 @utility marquee-fade {
+  /*
+    Wytopienie po lewej jest szerokie, bo od tej strony taśma wjeżdża pod
+    podpis. Na telefonie podpisu obok nie ma (stoi wierszem wyżej), a 5 rem
+    zjadałoby jedną czwartą wąskiego ekranu, więc zostaje sam miękki brzeg.
+  */
+  --fade-left: 1.5rem;
   mask-image: linear-gradient(
     to right,
     transparent 0,
-    #000 5rem,
+    #000 var(--fade-left),
     #000 calc(100% - 4rem),
     transparent 100%
   );
+}
+
+@media (width >= 40rem) {
+  .marquee-fade {
+    --fade-left: 5rem;
+  }
 }
 
 /*

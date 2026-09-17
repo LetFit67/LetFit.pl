@@ -138,7 +138,7 @@ export const pl = {
       "do umówienia i przeprowadzenia wizyty. Szczegóły w polityce prywatności.",
     /** Lokalizacja, której dotyczy formularz — żeby nie było wątpliwości. */
     locationNote:
-      "Formularz dotyczy gabinetu w Markach przy ul. Kościuszki 59 oraz wizyt domowych.",
+      "Formularz dotyczy gabinetu w Markach przy ul. Kościuszki 57 oraz wizyt domowych.",
     /**
      * Przycisk obok notki powyżej. Puste = przycisk się nie renderuje.
      * Znika też sam, gdy `business.booksyUrl` jest pusty.
@@ -828,7 +828,7 @@ export const pl = {
       {
         q: "Gdzie przyjmujesz?",
         a:
-          "W gabinecie w Markach przy ul. Kościuszki 59. Dojeżdżam też do pacjenta " +
+          "W gabinecie w Markach przy ul. Kościuszki 57. Dojeżdżam też do pacjenta " +
           "do domu, jeśli dotarcie do gabinetu jest utrudnione. Termin umówisz przez " +
           "formularz na tej stronie.",
       },

@@ -114,7 +114,7 @@ export const en: Content = {
       "site stores nothing and sends nothing in the background. The data serves only " +
       "to arrange and carry out the visit. Details are in the privacy policy.",
     locationNote:
-      "This form covers the practice in Marki at ul. Kościuszki 59 and home visits.",
+      "This form covers the practice in Marki at ul. Kościuszki 57 and home visits.",
     /* Puste — nie ma już dokąd odsyłać po wycofaniu Booksy. */
     booksyLabel: "",
 
@@ -695,7 +695,7 @@ export const en: Content = {
       {
         q: "Where do you see patients?",
         a:
-          "At the practice in Marki, ul. Kościuszki 59. I also travel to patients at home " +
+          "At the practice in Marki, ul. Kościuszki 57. I also travel to patients at home " +
           "when getting to the practice is difficult. You can arrange a time through the " +
           "form on this site.",
       },

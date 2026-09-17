@@ -200,6 +200,11 @@ export function Collaborations() {
         Podpis stoi nieruchomo po lewej, a taśma z klubami jedzie obok niego.
         Na jasnym podłożu podpis musi mieć własne tło i wytopienie w prawo —
         inaczej nazwy wjeżdżałyby wprost pod niego i zlewały się z nim.
+
+        NA TELEFONIE PODPIS IDZIE DO OSOBNEGO WIERSZA, NAD TAŚMĘ. Przy 375 px
+        zabierał z boku prawie połowę miejsca i na resztę zostawało tyle, że
+        w kadrze mieściła się jedna nazwa bez herbu. Ułożone w pionie oddają
+        taśmie pełną szerokość ekranu.
       */}
       {/*
         Taśma siedzi w tym samym kontenerze co reszta strony, a nie na całej
@@ -208,8 +213,8 @@ export function Collaborations() {
         trzy nazwy stały obok siebie. Ograniczony do kontenera mieści mniej
         więcej jedną kopię, więc nazwa wraca dopiero po pełnym obrocie.
       */}
-      <div className="container-x relative flex items-center">
-        <p className="relative z-10 shrink-0 bg-mist pr-6 text-xs font-semibold tracking-[0.18em] text-ink-40 uppercase">
+      <div className="container-x relative flex flex-col items-start gap-1.5 sm:flex-row sm:items-center sm:gap-0">
+        <p className="relative z-10 shrink-0 bg-mist text-xs font-semibold tracking-[0.18em] text-ink-40 uppercase sm:pr-6">
           {t.collaborations.lead}
         </p>
 
@@ -218,7 +223,7 @@ export function Collaborations() {
           schowane przed czytnikiem ekranu. Dlaczego akurat tyle kopii —
           patrz `marquee-track` w globals.css.
         */}
-        <div className="marquee-fade min-w-0 flex-1 overflow-hidden">
+        <div className="marquee-fade w-full min-w-0 overflow-hidden sm:flex-1">
           <div
             className="marquee-track"
             style={{ "--marquee-copies": MARQUEE_COPIES } as CSSProperties}

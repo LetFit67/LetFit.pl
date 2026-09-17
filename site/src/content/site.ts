@@ -83,18 +83,18 @@ export const business: {
   locations: [
     {
       id: "marki",
-      street: "ul. Kościuszki 59",
+      street: "ul. Kościuszki 57",
       city: "Marki",
       postalCode: "05-270", // ogólny kod dla Marek — warto zweryfikować
       mapsUrl:
-        "https://www.google.com/maps/search/?api=1&query=Ko%C5%9Bciuszki+59+05-270+Marki",
+        "https://www.google.com/maps/search/?api=1&query=Ko%C5%9Bciuszki+57+05-270+Marki",
       /**
        * Osadzenie przez `output=embed` — nie wymaga klucza do Maps Embed API.
        * Mapa wskazuje adres, a nie konkretny lokal; gdy poznamy dokładną
        * pinezkę, najlepiej podmienić na link z „Udostępnij → Umieść mapę”.
        */
       mapsEmbedUrl:
-        "https://www.google.com/maps?q=Ko%C5%9Bciuszki%2059%2C%2005-270%20Marki&z=16&output=embed",
+        "https://www.google.com/maps?q=Ko%C5%9Bciuszki%2057%2C%2005-270%20Marki&z=16&output=embed",
       bookingUrl: "",
     },
     /*
