@@ -133,9 +133,9 @@ export const pl = {
      * więc musi wiedzieć, gdzie one trafiają.
      */
     privacyNote:
-      "Zgłoszenie wysyłasz bezpośrednio do mnie, e-mailem ze swojej skrzynki. " +
-      "Strona niczego nie zapisuje ani nie wysyła w tle. Dane służą wyłącznie " +
-      "do umówienia i przeprowadzenia wizyty. Szczegóły w polityce prywatności.",
+      "Zgłoszenie trafia prosto na moją skrzynkę, przez zewnętrzną usługę " +
+      "pośredniczącą w wysyłce formularzy. Dane służą wyłącznie do umówienia " +
+      "i przeprowadzenia wizyty. Szczegóły w polityce prywatności.",
     /** Lokalizacja, której dotyczy formularz — żeby nie było wątpliwości. */
     locationNote:
       "Formularz dotyczy gabinetu w Markach przy ul. Kościuszki 57 oraz wizyt domowych.",
@@ -157,25 +157,47 @@ export const pl = {
     labels: {
       firstName: "Imię",
       lastName: "Nazwisko",
+      /* Telefon jest obowiązkowy, e-mail nie: potwierdzenie terminu i tak
+         idzie telefonicznie, a wymuszanie dwóch kanałów naraz odsiewa część
+         zgłoszeń. Dopisek przy etykiecie mówi, które pole jest dobrowolne. */
+      phone: "Telefon",
+      phoneHint: "Na ten numer zadzwonię z potwierdzeniem terminu.",
+      email: "E-mail (opcjonalnie)",
       complaint: "Krótki opis dolegliwości",
       complaintHint: "Co boli, od kiedy i co to pogarsza. Wystarczą dwa zdania.",
       service: "Usługa",
       servicePlaceholder: "Wybierz usługę",
       date: "Data",
       time: "Godzina",
-      submitEmail: "Wyślij zgłoszenie e-mailem",
+      submit: "Wyślij zgłoszenie",
+      sending: "Wysyłam…",
       missingChannel:
-        "[UZUPEŁNIJ: adres e-mail, bez niego nie ma czym wysłać zgłoszenia]",
+        "[UZUPEŁNIJ: identyfikator Formspree, bez niego nie ma czym wysłać zgłoszenia]",
     },
 
     errors: {
       firstName: "Podaj imię.",
       lastName: "Podaj nazwisko.",
+      phone: "Podaj numer telefonu, na który mogę zadzwonić.",
+      email: "Ten adres e-mail wygląda na niepełny.",
       service: "Wybierz usługę.",
       complaint: "Napisz w dwóch zdaniach, co ci dolega.",
       date: "Wybierz dzień.",
       time: "Wybierz godzinę.",
       summary: "Uzupełnij zaznaczone pola. Bez nich nie wiem, z czym i kiedy przychodzisz.",
+    },
+
+    /**
+     * Co widać po kliknięciu „Wyślij". Przy niepowodzeniu podajemy telefon,
+     * bo zgłoszenie, które nie doszło, musi mieć drugie wyjście — inaczej
+     * pacjent zostaje z niczym.
+     */
+    status: {
+      okTitle: "Zgłoszenie wysłane",
+      okBody:
+        "Odezwę się z potwierdzeniem terminu. Jeśli sprawa jest pilna, zadzwoń.",
+      errorTitle: "Nie udało się wysłać",
+      errorBody: "Spróbuj jeszcze raz albo zadzwoń, umówimy się od ręki.",
     },
 
     calendar: {
@@ -204,6 +226,8 @@ export const pl = {
     message: {
       title: "Zgłoszenie wizyty ze strony LetFit",
       name: "Imię i nazwisko",
+      phone: "Telefon",
+      email: "E-mail",
       service: "Usługa",
       slot: "Proponowany termin",
       at: "godz.",
@@ -954,12 +978,12 @@ export const pl = {
       "prawny (art. 6 ust. 1 lit. c RODO).",
     dataFormLabel: "Zgłoszenie wizyty przez stronę",
     dataForm:
-      "imię, nazwisko, wybrana usługa, proponowany termin i krótki opis dolegliwości. " +
-      "Formularz niczego nie wysyła sam i nie zapisuje danych na serwerze: składa " +
-      "z nich gotową wiadomość, którą wysyłasz ze swojej skrzynki e-mail. Trafia ona " +
-      "bezpośrednio do mnie, a pośrednikiem jest wyłącznie dostawca poczty, " +
-      "z którego korzystasz. Jeśli wolisz nie opisywać dolegliwości na piśmie, " +
-      "zadzwoń albo opowiedz o nich na wizycie.",
+      "imię, nazwisko, numer telefonu, opcjonalnie adres e-mail, wybrana usługa, " +
+      "proponowany termin i krótki opis dolegliwości. Zgłoszenie trafia na moją " +
+      "skrzynkę za pośrednictwem zewnętrznej usługi obsługującej wysyłkę " +
+      "formularzy, z siedzibą w Stanach Zjednoczonych. Numer telefonu jest " +
+      "potrzebny, żeby potwierdzić termin. Jeśli wolisz nie opisywać dolegliwości " +
+      "na piśmie, zadzwoń albo opowiedz o nich na wizycie.",
 
     retentionHeading: "Jak długo przechowuję dane",
     retention:
@@ -988,10 +1012,13 @@ export const pl = {
       "udostępniam danych biuru rachunkowemu. Danych nie sprzedaję i nie przekazuję " +
       "do celów marketingowych.",
     recipientsInfra:
-      "Z konieczności technicznej dostęp do części danych mają dwie usługi, bez " +
-      "których strona i poczta nie działają: dostawca skrzynki, na którą przychodzi " +
-      "twoje zgłoszenie, oraz dostawca hostingu tej strony, którego serwer zapisuje " +
-      "adresy IP odwiedzających. Nie zaglądam w te dane poza obsługą zgłoszeń.",
+      "Z konieczności technicznej dostęp do części danych mają trzy usługi, bez " +
+      "których strona, formularz i poczta nie działają: dostawca skrzynki, na którą " +
+      "przychodzi twoje zgłoszenie, dostawca hostingu tej strony, którego serwer " +
+      "zapisuje adresy IP odwiedzających, oraz dostawca obsługi formularzy, który " +
+      "przekazuje zgłoszenie z formularza na moją skrzynkę. Ten ostatni ma siedzibę " +
+      "w Stanach Zjednoczonych, więc dane ze zgłoszenia są przekazywane poza " +
+      "Europejski Obszar Gospodarczy. Nie zaglądam w te dane poza obsługą zgłoszeń.",
     /** Puste = ramka ze znacznikiem [UZUPEŁNIJ] w ogóle się nie renderuje. */
     recipientsTodo: "",
 

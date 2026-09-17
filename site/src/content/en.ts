@@ -124,13 +124,17 @@ export const en: Content = {
     labels: {
       firstName: "First name",
       lastName: "Last name",
+      phone: "Phone",
+      phoneHint: "I will call this number to confirm the time.",
+      email: "E-mail (optional)",
       complaint: "Briefly, what is wrong",
       complaintHint: "What hurts, since when, and what makes it worse. Two sentences is enough.",
       service: "Service",
       servicePlaceholder: "Choose a service",
       date: "Date",
       time: "Time",
-      submitEmail: "Send the request by e-mail",
+      submit: "Send the request",
+      sending: "Sending…",
       missingChannel:
         "[UZUPEŁNIJ: adres e-mail, bez niego nie ma czym wysłać zgłoszenia]",
     },
@@ -138,11 +142,20 @@ export const en: Content = {
     errors: {
       firstName: "Enter your first name.",
       lastName: "Enter your last name.",
+      phone: "Enter a phone number I can call.",
+      email: "That e-mail address looks incomplete.",
       service: "Choose a service.",
       complaint: "Describe in two sentences what is bothering you.",
       date: "Choose a day.",
       time: "Choose a time.",
       summary: "Fill in the marked fields. Without them I do not know what you are coming with, or when.",
+    },
+
+    status: {
+      okTitle: "Request sent",
+      okBody: "I will get back to you to confirm the time. If it is urgent, call me.",
+      errorTitle: "The request did not go through",
+      errorBody: "Try again, or call me and we will arrange it right away.",
     },
 
     calendar: {
@@ -167,6 +180,8 @@ export const en: Content = {
     message: {
       title: "Appointment request from the LetFit website",
       name: "Name",
+      phone: "Phone",
+      email: "E-mail",
       service: "Service",
       slot: "Proposed time",
       at: "at",
@@ -811,12 +826,12 @@ export const en: Content = {
       "(Art. 6(1)(c) GDPR).",
     dataFormLabel: "Appointment request through the site",
     dataForm:
-      "first name, last name, the chosen service, the proposed time and a short " +
-      "description of your symptoms. The form sends nothing by itself and stores no data " +
-      "on a server: it assembles a ready message which you send from your own e-mail " +
-      "account. It reaches me directly, and the only intermediary is the mail provider " +
-      "you use. If you would rather not put your symptoms in writing, call instead or " +
-      "describe them at the visit.",
+      "first name, last name, phone number, optionally an e-mail address, the chosen " +
+      "service, the proposed time and a short description of your symptoms. The " +
+      "request reaches my mailbox through an external form-delivery service based in " +
+      "the United States. The phone number is needed to confirm the time. If you would " +
+      "rather not put your symptoms in writing, call instead or describe them at the " +
+      "visit.",
 
     retentionHeading: "How long I keep the data",
     retention:
@@ -830,10 +845,13 @@ export const en: Content = {
       "records in external software and I share nothing with an accounting office. " +
       "I do not sell the data and I do not pass it on for marketing.",
     recipientsInfra:
-      "Out of technical necessity, two services can reach part of the data, because " +
-      "without them neither this site nor e-mail works: the provider of the mailbox " +
-      "your request arrives in, and the provider hosting this site, whose server logs " +
-      "visitors' IP addresses. I do not look into that data beyond handling requests.",
+      "Out of technical necessity, three services can reach part of the data, because " +
+      "without them the site, the form and e-mail do not work: the provider of the " +
+      "mailbox your request arrives in, the provider hosting this site, whose server " +
+      "logs visitors' IP addresses, and the form-delivery provider that passes your " +
+      "request from the form to my mailbox. The last of these is based in the United " +
+      "States, so data from the request is transferred outside the European Economic " +
+      "Area. I do not look into that data beyond handling requests.",
     recipientsTodo: "",
 
     rightsHeading: "Your rights",

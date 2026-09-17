@@ -242,6 +242,21 @@ export const bookingConfig = {
   enabled: true,
 
   /**
+   * Identyfikator formularza w Formspree — końcówka adresu
+   * `https://formspree.io/f/xxxxxxxx`, na który formularz wysyła zgłoszenia.
+   *
+   * NIE JEST TAJNY i nie ma sensu chować go w zmiennej środowiskowej: leci
+   * w żądaniu z przeglądarki, więc widać go w kodzie każdej strony z Formspree.
+   * Trzymanie go tutaj ma tę zaletę, że strona nie zależy od ustawienia
+   * w panelu hostingu, o którym łatwo zapomnieć przy przenosinach.
+   *
+   * Puste = formularz nie ma czym wysłać i mówi o tym wprost, zamiast udawać,
+   * że zgłoszenie poleciało. Skrzynka odbiorcza i autoresponder ustawiane są
+   * po stronie Formspree, nie tutaj.
+   */
+  formspreeId: "myezylvo",
+
+  /**
    * Grafik, z którego kalendarzyk buduje dostępne dni i godziny.
    *
    * Soboty są przyjmowane, godziny 8:00–20:00 potwierdzone przez Mikołaja

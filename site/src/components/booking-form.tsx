@@ -15,15 +15,27 @@ import { ButtonLink, PhoneIcon } from "./ui";
  * ważna: bez niej dzisiejszy dzień o 21:00 dalej byłby klikalny, a lista
  * godzin pod nim byłaby pusta.
  *
- * Wysyłka nie idzie na serwer, bo backendu nie ma. Formularz składa gotową
- * wiadomość i przekazuje ją do klienta poczty — pacjent wysyła ją ze swojej
- * skrzynki, więc Mikołaj od razu ma kontakt zwrotny. Brak `email` wyłącza
- * wysyłkę i pokazuje to wprost, zamiast udawać, że zgłoszenie gdzieś poleciało.
+ * WYSYŁKA IDZIE PRZEZ FORMSPREE. Strona jest statyczna i nie ma własnego
+ * backendu, więc zgłoszenie leci żądaniem z przeglądarki prosto do usługi,
+ * która przekazuje je na skrzynkę Mikołaja. Adres skrzynki i ewentualny
+ * autoresponder ustawia się w panelu Formspree, nie w kodzie.
  *
- * WIADOMOŚĆ IDZIE W JĘZYKU, W KTÓRYM PACJENT CZYTAŁ STRONĘ. Nazwy pól są
- * tłumaczone razem z resztą, bo pacjent wysyła ją ze swojej skrzynki i musi
- * rozumieć, co podpisuje. Zgłoszenie po angielsku jest sygnałem samym w sobie:
- * mówi Mikołajowi, w jakim języku oddzwonić.
+ * Wcześniej formularz otwierał `mailto:` i to pacjent wysyłał wiadomość ze
+ * swojej skrzynki. Kosztowało to zgłoszenia: na telefonie bez skonfigurowanej
+ * poczty kliknięcie kończyło się niczym, bez śladu i bez ostrzeżenia.
+ *
+ * DLATEGO DOSZŁO POLE TELEFONU, obowiązkowe. Przy `mailto:` adres zwrotny brał
+ * się sam ze skrzynki nadawcy; teraz wysyła serwer, więc bez numeru Mikołaj
+ * dostałby zgłoszenie, którego nie ma jak potwierdzić. E-mail jest dobrowolny:
+ * potwierdzenie i tak idzie telefonicznie, a dwa wymagane kanały naraz
+ * odsiewają część pacjentów.
+ *
+ * Brak `formspreeId` wyłącza wysyłkę i pokazuje to wprost, zamiast udawać,
+ * że zgłoszenie gdzieś poleciało.
+ *
+ * TREŚĆ IDZIE W JĘZYKU, W KTÓRYM PACJENT CZYTAŁ STRONĘ. Nazwy pól są
+ * tłumaczone razem z resztą, bo zgłoszenie po angielsku jest sygnałem samym
+ * w sobie: mówi Mikołajowi, w jakim języku oddzwonić.
  */
 
 const startOfDay = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate());
@@ -76,6 +88,8 @@ export function BookingForm() {
     errors: errorMsg,
     calendar,
     message: messageText,
+    /* Pod inną nazwą, bo `status` to niżej stan wysyłki. */
+    status: statusText,
     privacyNote,
     orLabel,
     callPrompt,
@@ -105,7 +119,15 @@ export function BookingForm() {
 
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState("");
   const [complaint, setComplaint] = useState("");
+  /** Stan wysyłki: spoczynek, w locie, doszło, nie doszło. */
+  const [status, setStatus] = useState<"idle" | "sending" | "ok" | "error">("idle");
+  /* Pułapka na boty: pole niewidoczne dla człowieka. Formspree odrzuca
+     zgłoszenie, gdy `_gotcha` przyjdzie wypełnione, a żaden pacjent go nie
+     zobaczy ani nie wypełni klawiaturą. Tańsze niż przepisywanie obrazków. */
+  const [gotcha, setGotcha] = useState("");
   /* Indeks pozycji w cenniku, a nie jej nazwa — patrz `services` niżej. */
   const [serviceIndex, setServiceIndex] = useState("");
   const [date, setDate] = useState<Date | null>(null);
@@ -173,6 +195,14 @@ export function BookingForm() {
   const errors = {
     firstName: !firstName.trim(),
     lastName: !lastName.trim(),
+    /* Numeru nie walidujemy wzorcem: bywa z kierunkowym, ze spacjami,
+       z myślnikami, czasem zagraniczny. Odrzucanie „nietypowych" zapisów
+       kosztowałoby prawdziwe zgłoszenia, a numer i tak czyta człowiek. */
+    phone: !phone.trim(),
+    /* E-mail jest dobrowolny, więc pusty jest w porządku. Wypełniony musi
+       jednak wyglądać jak adres — literówka w polu, o które nikt nie prosił,
+       to strata cicha: pacjent myśli, że zostawił kontakt. */
+    email: email.trim() !== "" && !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email.trim()),
     complaint: !complaint.trim(),
     service: serviceIndex === "",
     date: !date,
@@ -180,7 +210,7 @@ export function BookingForm() {
   };
   const hasErrors = Object.values(errors).some(Boolean);
 
-  const channelReady = !isTodo(business.email);
+  const channelReady = Boolean(bookingConfig.formspreeId) && !isTodo(bookingConfig.formspreeId);
 
   /** Data w treści zgłoszenia, zapisana wg reguł danego języka. */
   const longDate = (d: Date) =>
@@ -193,26 +223,51 @@ export function BookingForm() {
 
   const fullName = `${firstName.trim()} ${lastName.trim()}`;
 
-  const message = () =>
-    [
-      messageText.title,
-      "",
-      `${messageText.name}: ${fullName}`,
-      `${messageText.service}: ${service}`,
-      `${messageText.slot}: ${date ? longDate(date) : ""}, ${messageText.at} ${time}`,
-      "",
-      `${messageText.complaint}: ${complaint.trim()}`,
-    ].join("\n");
-
-  const send = () => {
+  const send = async () => {
     setShowErrors(true);
     if (hasErrors) {
       document.getElementById("zgloszenie-blad")?.scrollIntoView({ block: "center" });
       return;
     }
-    window.location.href = `mailto:${business.email}?subject=${encodeURIComponent(
-      messageText.subject(fullName)
-    )}&body=${encodeURIComponent(message())}`;
+    /* Drugie kliknięcie w trakcie wysyłki dałoby dwa takie same zgłoszenia
+       na skrzynce. Przycisk jest wtedy zablokowany, ale klawiatura i podwójny
+       tap na dotyku potrafią go wyprzedzić. */
+    if (status === "sending") return;
+
+    setStatus("sending");
+    try {
+      /*
+        Klucze są nazwane po ludzku i w języku pacjenta, bo Formspree wysyła
+        je na skrzynkę dokładnie w tej postaci. `email` to nazwa umowna:
+        usługa ustawia z niej adres zwrotny, więc odpowiedź z Gmaila trafia
+        wprost do pacjenta, o ile go podał.
+      */
+      const odpowiedz = await fetch(
+        `https://formspree.io/f/${bookingConfig.formspreeId}`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Accept: "application/json" },
+          body: JSON.stringify({
+            _subject: messageText.subject(fullName),
+            [messageText.name]: fullName,
+            [messageText.phone]: phone.trim(),
+            [messageText.email]: email.trim(),
+            [messageText.service]: service,
+            [messageText.slot]: `${date ? longDate(date) : ""}, ${messageText.at} ${time}`,
+            [messageText.complaint]: complaint.trim(),
+            email: email.trim(),
+            _gotcha: gotcha,
+          }),
+        }
+      );
+
+      if (!odpowiedz.ok) throw new Error(`Formspree: ${odpowiedz.status}`);
+      setStatus("ok");
+    } catch {
+      /* Czemu nie doszło, pacjenta nie interesuje — interesuje go, co teraz
+         zrobić. Komunikat o błędzie podaje telefon jako drugą drogę. */
+      setStatus("error");
+    }
   };
 
   const field =
@@ -274,6 +329,55 @@ export function BookingForm() {
             />
             {showErrors && errors.lastName && (
               <span className={errorClass}>{errorMsg.lastName}</span>
+            )}
+          </div>
+        </div>
+
+        {/* Telefon i e-mail w jednym rzędzie, tak jak imię i nazwisko:
+            to jedna sprawa, „jak się z tobą skontaktować". */}
+        <div className="mt-5 grid gap-5 sm:grid-cols-2">
+          <div>
+            <label className={label} htmlFor="telefon">
+              {labels.phone}
+            </label>
+            <input
+              id="telefon"
+              name="telefon"
+              type="tel"
+              inputMode="tel"
+              autoComplete="tel"
+              className={field}
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              aria-invalid={showErrors && errors.phone}
+              aria-describedby="telefon-podpowiedz"
+            />
+            {showErrors && errors.phone ? (
+              <span className={errorClass}>{errorMsg.phone}</span>
+            ) : (
+              <span id="telefon-podpowiedz" className="mt-1.5 block text-xs text-ink-40">
+                {labels.phoneHint}
+              </span>
+            )}
+          </div>
+
+          <div>
+            <label className={label} htmlFor="email">
+              {labels.email}
+            </label>
+            <input
+              id="email"
+              name="email"
+              type="email"
+              inputMode="email"
+              autoComplete="email"
+              className={field}
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              aria-invalid={showErrors && errors.email}
+            />
+            {showErrors && errors.email && (
+              <span className={errorClass}>{errorMsg.email}</span>
             )}
           </div>
         </div>
@@ -444,14 +548,62 @@ export function BookingForm() {
             </p>
           )}
 
+          {/* Pułapka na boty. `tabIndex={-1}` i `aria-hidden` trzymają ją poza
+              zasięgiem klawiatury i czytnika ekranu, więc wypełnić ją potrafi
+              tylko skrypt lecący po wszystkich polach formularza. */}
+          <input
+            type="text"
+            name="_gotcha"
+            value={gotcha}
+            onChange={(e) => setGotcha(e.target.value)}
+            tabIndex={-1}
+            autoComplete="off"
+            aria-hidden="true"
+            className="pointer-events-none absolute left-[-9999px] size-0 opacity-0"
+          />
+
           {channelReady ? (
-            <button
-              type="button"
-              onClick={send}
-              className="inline-flex items-center justify-center gap-2 rounded-btn bg-blue px-6 py-3.5 text-sm font-semibold text-paper transition-colors hover:bg-blue-bright hover:text-ink"
-            >
-              {labels.submitEmail}
-            </button>
+            status === "ok" ? (
+              /* Po udanej wysyłce przycisk znika. Zostawiony kusiłby do
+                 drugiego kliknięcia, a zgłoszenie jest już na skrzynce. */
+              <div
+                role="status"
+                className="rounded-card border border-blue/30 bg-blue/5 px-5 py-4"
+              >
+                <p className="font-display text-base font-semibold text-ink">
+                  {statusText.okTitle}
+                </p>
+                <p className="mt-1 text-sm leading-relaxed text-ink-60">
+                  {statusText.okBody}
+                </p>
+              </div>
+            ) : (
+              <>
+                <button
+                  type="button"
+                  onClick={send}
+                  disabled={status === "sending"}
+                  aria-busy={status === "sending"}
+                  className="inline-flex items-center justify-center gap-2 rounded-btn bg-blue px-6 py-3.5 text-sm font-semibold text-paper transition-colors hover:bg-blue-bright hover:text-ink disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:bg-blue disabled:hover:text-paper"
+                >
+                  {status === "sending" ? labels.sending : labels.submit}
+                </button>
+
+                {status === "error" && (
+                  <div role="alert" className="mt-4 text-sm leading-relaxed">
+                    <p className="font-semibold text-blue">{statusText.errorTitle}</p>
+                    <p className="mt-1 text-ink-60">
+                      {statusText.errorBody}{" "}
+                      {telLink && (
+                        <a href={telLink} className="font-semibold text-blue underline">
+                          {business.phoneDisplay}
+                        </a>
+                      )}
+                    </p>
+                  </div>
+                )}
+              </>
+            )
           ) : (
             <p className="rounded-btn border border-blue/30 bg-blue/5 px-4 py-3 text-sm text-ink-60">
               {labels.missingChannel}
