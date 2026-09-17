@@ -1,6 +1,12 @@
 "use client";
 
-import { useEffect, useRef, useState, type CSSProperties } from "react";
+import {
+  useEffect,
+  useRef,
+  useState,
+  useSyncExternalStore,
+  type CSSProperties,
+} from "react";
 import { useT } from "@/lib/i18n";
 
 /**
@@ -40,6 +46,35 @@ import { useT } from "@/lib/i18n";
  */
 const LOOP_COPIES = 3;
 
+/* ------------------------------------------------------------------ */
+/* CZY ODGRYWAMY WEJŚCIE KART                                          */
+/* ------------------------------------------------------------------ */
+
+/**
+ * Trzy powody, dla których odpowiedź brzmi „nie": ktoś prosił o mniej ruchu
+ * w systemie, karta jest w tle (zegar stoi, a strona bywa renderowana przez
+ * boty do zrzutów) albo przeglądarka nie zna `IntersectionObserver`.
+ */
+const subskrybujWejscie = (zmiana: () => void) => {
+  const media = window.matchMedia("(prefers-reduced-motion: reduce)");
+  media.addEventListener("change", zmiana);
+  /* Karta otwarta w tle i dopiero potem przełączona na wierzch: bez tego
+     nasłuchu odpowiedź zostałaby przy „nie" z chwili montowania i pas nigdy
+     nie odegrałby wejścia, mimo że pacjent właśnie na niego patrzy. */
+  document.addEventListener("visibilitychange", zmiana);
+  return () => {
+    media.removeEventListener("change", zmiana);
+    document.removeEventListener("visibilitychange", zmiana);
+  };
+};
+
+const odczytWejscia = () =>
+  !window.matchMedia("(prefers-reduced-motion: reduce)").matches &&
+  !document.hidden &&
+  "IntersectionObserver" in window;
+
+const odczytWejsciaNaSerwerze = () => false;
+
 type Item = {
   quote: string;
   author: string;
@@ -57,7 +92,29 @@ export function TestimonialsRail({
   dragHint?: string;
 }) {
   const railRef = useRef<HTMLUListElement>(null);
-  const [phase, setPhase] = useState<"idle" | "pending" | "in">("idle");
+  /**
+   * Czy w ogóle odgrywamy wejście kart.
+   *
+   * Czytane jak stan zewnętrznego systemu, a nie ustawiane w efekcie. Ma to
+   * znaczenie dla momentu: stan ukryty musi obowiązywać JESZCZE PRZED
+   * pierwszym malowaniem, inaczej karty mrugną w pełnej widoczności, zanim
+   * zdążą się schować. Ustawienie stanu w efekcie dawało tę odpowiedź o jedną
+   * klatkę za późno i przy okazji łamało regułę `set-state-in-effect`.
+   *
+   * Na serwerze i w karcie w tle: nie. Wtedy `phase` zostaje na „idle",
+   * a pas jest po prostu widoczny, co jest jego stanem bazowym w CSS.
+   */
+  const odgrywamy = useSyncExternalStore(
+    subskrybujWejscie,
+    odczytWejscia,
+    odczytWejsciaNaSerwerze
+  );
+  const [entered, setEntered] = useState(false);
+  const phase: "idle" | "pending" | "in" = !odgrywamy
+    ? "idle"
+    : entered
+      ? "in"
+      : "pending";
   const [dragging, setDragging] = useState(false);
 
   /* Przy jednej opinii nie ma czego zapętlać — zostaje zwykły, krótki pas. */
@@ -70,18 +127,13 @@ export function TestimonialsRail({
   useEffect(() => {
     const rail = railRef.current;
     if (!rail) return;
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    // W karcie w tle zegar stoi — pas ma tam zostać po prostu widoczny.
-    if (document.hidden) return;
-    if (!("IntersectionObserver" in window)) return;
-
-    setPhase("pending");
+    if (!odgrywamy) return;
 
     const io = new IntersectionObserver(
       (entries) => {
         entries.forEach((e) => {
           if (!e.isIntersecting) return;
-          setPhase("in");
+          setEntered(true);
           io.disconnect();
         });
       },
@@ -90,13 +142,13 @@ export function TestimonialsRail({
 
     io.observe(rail);
     // Bezpiecznik — gdyby obserwator nigdy nie zadziałał, odsłaniamy sami.
-    const t = window.setTimeout(() => setPhase("in"), 2500);
+    const t = window.setTimeout(() => setEntered(true), 2500);
 
     return () => {
       io.disconnect();
       window.clearTimeout(t);
     };
-  }, []);
+  }, [odgrywamy]);
 
   /* ---------------------------------------------------------------- */
   /* PRZECIĄGANIE                                                      */

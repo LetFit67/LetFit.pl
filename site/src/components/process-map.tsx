@@ -5,6 +5,7 @@ import {
   useEffect,
   useRef,
   useState,
+  useSyncExternalStore,
   type CSSProperties,
 } from "react";
 
@@ -99,6 +100,37 @@ type Geometry = {
   anchors: number[];
 };
 
+/* ------------------------------------------------------------------ */
+/* CZY WOLNO ANIMOWAĆ                                                  */
+/* ------------------------------------------------------------------ */
+
+/**
+ * Odpowiedź czytamy jak stan zewnętrznego systemu, a nie ustawiamy jej
+ * w efekcie. Ustawienie stanu w ciele efektu dokłada kaskadowy render i jest
+ * odradzane przez React; `useSyncExternalStore` daje tę samą wartość, ale
+ * przed pierwszym malowaniem i bez rozjazdu przy hydratacji.
+ *
+ * Na serwerze odpowiedź brzmi „nie". W karcie otwartej w tle też: tam oś czasu
+ * dokumentu stoi, a strona bywa renderowana przez boty do zrzutów. Mapa zostaje
+ * wtedy kompletną, statyczną listą etapów, zamiast pokazać jeden przystanek
+ * i trzy puste miejsca. Po powrocie na wierzch animacja włącza się sama, bo
+ * przeglądarka zgłasza `visibilitychange`.
+ */
+const subskrybujRuch = (zmiana: () => void) => {
+  document.addEventListener("visibilitychange", zmiana);
+  const media = window.matchMedia("(prefers-reduced-motion: reduce)");
+  media.addEventListener("change", zmiana);
+  return () => {
+    document.removeEventListener("visibilitychange", zmiana);
+    media.removeEventListener("change", zmiana);
+  };
+};
+
+const odczytRuchu = () =>
+  !document.hidden && !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+const odczytRuchuNaSerwerze = () => false;
+
 export function ProcessMap({ steps }: { steps: Step[] }) {
   const wrapRef = useRef<HTMLDivElement>(null);
   const nodeRefs = useRef<(HTMLLIElement | null)[]>([]);
@@ -106,7 +138,21 @@ export function ProcessMap({ steps }: { steps: Step[] }) {
 
   const [geo, setGeo] = useState<Geometry | null>(null);
   const [progress, setProgress] = useState(0);
-  const [animated, setAnimated] = useState(false);
+  /**
+   * Położenie i kąt grotu. Trzymane w stanie, a NIE liczone w trakcie renderu:
+   * dane biorą się z `pathRef`, a ref odczytany podczas renderu pokazuje stan
+   * DOM sprzed tego renderu, więc strzałka potrafiła jechać o klatkę za linią.
+   * Liczymy je tam, gdzie ref wolno czytać: w pętli klatek.
+   */
+  const [arrow, setArrow] = useState<{ x: number; y: number; angle: number } | null>(
+    null
+  );
+
+  const animated = useSyncExternalStore(
+    subskrybujRuch,
+    odczytRuchu,
+    odczytRuchuNaSerwerze
+  );
 
   /* ---------------------------------------------------------------- */
   /* POMIAR — ścieżka przez środki krawędzi kolejnych kafli            */
@@ -196,6 +242,38 @@ export function ProcessMap({ steps }: { steps: Step[] }) {
   const currentRef = useRef(0);
   const rafRef = useRef(0);
 
+  /**
+   * Punkt i kąt grotu odczytane wprost ze ścieżki SVG.
+   *
+   * Wywoływane z pętli klatek i z efektu po przemierzeniu układu, czyli
+   * z miejsc, w których wolno sięgać do refów. Postęp bierzemy z `currentRef`,
+   * a nie ze stanu: stan w tej samej klatce jest jeszcze poprzedni.
+   */
+  const policzStrzalke = useCallback(() => {
+    const path = pathRef.current;
+    const travel = Math.min(
+      1,
+      Math.max(0, (currentRef.current - ARROW_START) / ARROW_SPAN)
+    );
+
+    if (!path || travel <= 0.001) {
+      setArrow(null);
+      return;
+    }
+
+    const len = path.getTotalLength();
+    const at = len * travel;
+    const p1 = path.getPointAtLength(at);
+    // Drugi punkt tuż za pierwszym daje styczną, czyli kąt obrotu grotu.
+    const p2 = path.getPointAtLength(Math.min(len, at + 1.5));
+
+    setArrow({
+      x: p1.x,
+      y: p1.y,
+      angle: (Math.atan2(p2.y - p1.y, p2.x - p1.x) * 180) / Math.PI,
+    });
+  }, []);
+
   const update = useCallback(() => {
     const wrap = wrapRef.current;
     if (!wrap) return;
@@ -222,17 +300,30 @@ export function ProcessMap({ steps }: { steps: Step[] }) {
       if (Math.abs(diff) < 0.0004) {
         currentRef.current = targetRef.current;
         setProgress(currentRef.current);
+        policzStrzalke();
         rafRef.current = 0;
         return;
       }
 
       currentRef.current += diff * ARROW_EASING;
       setProgress(currentRef.current);
+      policzStrzalke();
       rafRef.current = requestAnimationFrame(step);
     };
 
     rafRef.current = requestAnimationFrame(step);
-  }, []);
+  }, [policzStrzalke]);
+
+  /*
+    Po każdej zmianie geometrii (obrót telefonu, podmiana kroju pisma) ścieżka
+    ma inny kształt, a strzałka wciąż stoi tam, gdzie była na starej. Pętla
+    klatek tego nie nadrobi, bo postęp przewijania się nie zmienił. Liczymy
+    więc grot jeszcze raz, w klatce PO tym, jak React odda nową ścieżkę do DOM.
+  */
+  useEffect(() => {
+    const klatka = requestAnimationFrame(policzStrzalke);
+    return () => cancelAnimationFrame(klatka);
+  }, [geo, animated, policzStrzalke]);
 
   useEffect(() => {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
@@ -241,18 +332,15 @@ export function ProcessMap({ steps }: { steps: Step[] }) {
     update();
 
     /*
-      W karcie otwartej w tle NIE włączamy trybu animowanego. Tam oś czasu
-      dokumentu stoi, a strona bywa renderowana przez boty do zrzutów —
-      mapa zostaje wtedy kompletną, statyczną listą etapów zamiast pokazać
-      jeden przystanek i trzy puste miejsca. Po powrocie na wierzch tryb
-      włącza się sam.
+      Sam tryb animowany czyta `useSyncExternalStore` (patrz „CZY WOLNO
+      ANIMOWAĆ" wyżej). Tutaj zostaje tylko przemierzenie układu po powrocie
+      na wierzch: w tle wymiary bywają zerowe, więc pomiar sprzed schowania
+      karty może być już nieaktualny.
     */
-    if (!document.hidden) setAnimated(true);
     const onVisible = () => {
       if (!document.hidden) {
         measure();
         update();
-        setAnimated(true);
       }
     };
     document.addEventListener("visibilitychange", onVisible);
@@ -309,23 +397,6 @@ export function ProcessMap({ steps }: { steps: Step[] }) {
     wersji przyciętej, bo ujemna długość ścieżki nie ma sensu.
   */
   const rawTravel = (progress - ARROW_START) / ARROW_SPAN;
-  const travel = Math.min(1, Math.max(0, rawTravel));
-
-  const path = pathRef.current;
-  let arrow: { x: number; y: number; angle: number } | null = null;
-
-  if (path && geo && animated && travel > 0.001) {
-    const len = path.getTotalLength();
-    const at = len * travel;
-    const p1 = path.getPointAtLength(at);
-    // Drugi punkt tuż za pierwszym daje styczną, czyli kąt obrotu grotu.
-    const p2 = path.getPointAtLength(Math.min(len, at + 1.5));
-    arrow = {
-      x: p1.x,
-      y: p1.y,
-      angle: (Math.atan2(p2.y - p1.y, p2.x - p1.x) * 180) / Math.PI,
-    };
-  }
 
   const active = (i: number) =>
     !animated || !geo || rawTravel >= (geo.anchors[i] ?? 0);
