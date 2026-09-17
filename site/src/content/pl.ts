@@ -994,23 +994,31 @@ export const pl = {
 
     recipientsHeading: "Komu przekazuję dane",
     /**
-     * Stan faktyczny na sierpień 2026, potwierdzony przez Mikołaja: NIE MA
-     * żadnych podmiotów trzecich. Nie ma systemu rezerwacji, biura rachunkowego
-     * z wglądem w dokumentację ani zewnętrznego oprogramowania do terapii.
+     * Stan faktyczny na wrzesień 2026, potwierdzony przez Mikołaja. Nie ma
+     * systemu rezerwacji, biura rachunkowego z wglądem w dokumentację ani
+     * zewnętrznego oprogramowania do terapii.
      *
-     * Zostają dwie usługi techniczne, których nie da się pominąć: poczta,
-     * na którą przychodzi zgłoszenie, i hosting, który widzi logi serwera.
-     * Podane jako KATEGORIE, nie z nazwy: RODO na to pozwala, a nazwa firmy
-     * i tak zmieni się przy przejściu na własną domenę.
+     * Zostają trzy usługi techniczne, których nie da się pominąć: poczta,
+     * na którą przychodzi zgłoszenie, hosting, który widzi logi serwera, oraz
+     * obsługa formularzy, przez którą idzie zgłoszenie ze strony. Ta trzecia
+     * doszła we wrześniu 2026 razem z Formspree i jest jedynym odbiorcą spoza
+     * Europejskiego Obszaru Gospodarczego.
+     *
+     * Podane jako KATEGORIE, nie z nazwy: RODO na to pozwala, a dostawcę
+     * łatwiej wymienić niż poprawiać dokument przy każdej zmianie.
+     *
+     * TEN AKAPIT NIE MOŻE ZACZYNAĆ SIĘ OD „nie przekazuję danych podmiotom
+     * trzecim", bo akapit niżej wymienia trzy usługi, które je dostają.
+     * Tak było do września 2026 i było to po prostu nieprawdziwe.
      *
      * Gdyby doszło biuro rachunkowe albo program do dokumentacji medycznej,
-     * ten akapit trzeba rozszerzyć, zanim zaczną przetwarzać dane.
+     * trzeba to dopisać, zanim zaczną przetwarzać dane.
      */
     recipients:
-      "Nie przekazuję twoich danych podmiotom trzecim. Nie korzystam z systemu " +
-      "rezerwacji, nie prowadzę dokumentacji w zewnętrznym oprogramowaniu i nie " +
-      "udostępniam danych biuru rachunkowemu. Danych nie sprzedaję i nie przekazuję " +
-      "do celów marketingowych.",
+      "Twoich danych nie sprzedaję i nie przekazuję do celów marketingowych. " +
+      "Nie korzystam z systemu rezerwacji, nie prowadzę dokumentacji " +
+      "w zewnętrznym oprogramowaniu i nie udostępniam danych biuru rachunkowemu. " +
+      "Poza usługami technicznymi wymienionymi niżej nikt nie ma do nich dostępu.",
     recipientsInfra:
       "Z konieczności technicznej dostęp do części danych mają trzy usługi, bez " +
       "których strona, formularz i poczta nie działają: dostawca skrzynki, na którą " +

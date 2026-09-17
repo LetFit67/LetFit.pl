@@ -841,9 +841,10 @@ export const en: Content = {
 
     recipientsHeading: "Who I share the data with",
     recipients:
-      "I do not pass your data to third parties. I use no booking system, I keep no " +
-      "records in external software and I share nothing with an accounting office. " +
-      "I do not sell the data and I do not pass it on for marketing.",
+      "I do not sell your data and I do not pass it on for marketing. I use no " +
+      "booking system, I keep no records in external software and I share nothing " +
+      "with an accounting office. Beyond the technical services listed below, " +
+      "nobody has access to it.",
     recipientsInfra:
       "Out of technical necessity, three services can reach part of the data, because " +
       "without them the site, the form and e-mail do not work: the provider of the " +
